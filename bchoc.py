@@ -3,7 +3,6 @@
 
 import sys
 
-
 class BlockChain:
 
     # should be ran at init run, with args passed in from cmd line
@@ -12,7 +11,9 @@ class BlockChain:
         # takes the cmd line inputs
         # removes filename, and set the args as a list
         list_of_commands = args[0][1:]
-        print(list_of_commands)
+
+        ''' print for testing command input '''
+        print(list_of_commands)       
 
     '''
     bchoc add -c case_id -i item_id [-i item_id ...]
