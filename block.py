@@ -7,7 +7,6 @@ class Block:
     def __init__(self, previous_hash, case_id, item_id, evidence_item_id, data):
         self.previos_hash = previous_hash
         self.case_id = case_id
-        self.item_id = item_id
         self.evidence_item_id = evidence_item_id
         self.Timestamp = (maya.now()).iso8601()
         self.state = None
