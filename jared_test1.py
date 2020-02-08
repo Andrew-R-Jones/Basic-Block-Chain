@@ -23,32 +23,26 @@ case_id_back = int(case_id_back)
 evidence_id = 123456
 state = "CHECKEDIN"
 state = bytes(state, 'utf-8')
-data = "just gonna leave this hear"
+data = "just gonna leave this here"
 length = len(data)
 data = bytes(data,'utf-8')
-#block_test = pack('20sdqqi11si26s',hash,timestamp,case_id_front,case_id_back,evidence_id,state,length,data)
-#a,b,c,d,e,f,g,h = unpack('20sdqqi11si26s', block_test)
-block_test = pack('20sdqqi11si26s',hash,timestamp,case_id_front,case_id_back,evidence_id,state,length,data)
-a,b,c,d,e,f,g,h = unpack('20sdqqi11si26s', block_test)
+block_test = pack('20sdqqi11si%ds'% (length),hash,timestamp,case_id_front,case_id_back,evidence_id,state,length,data)
+a,b,c,d,e,f,g,h = unpack('20sdqqi11si%ds'% (length), block_test)
+print(block_test)
 print("a: ", a, " b: ", b, " c:", c, " d:", d, " e:" ,e, "f: " ,f, "g:" , g, "h: ", h)
 
 #unpack
 unpack_hash = a.decode("utf-8")
 unpack_timestamp = b
-unpack_case_id = str(case_id_front) + str(case_id_back)
+unpack_case_id = str(c) + str(d)
+unpack_evidence = e
+unpack_state = f.decode("utf-8")
+unpack_length = g
+unpack_data = h.decode("utf-8")
 print("hash decode: ", unpack_hash)
 print("timestamp decode", unpack_timestamp)
 print("case_id decode: ", unpack_case_id)
-
-#I need help with the string conversion I am strugling understanding it
-#On stack overflow I found a solution but I dont understand % workings
-#to get the struct completed I need to add padding(easy), double check the bytes are correct
-# and finish variable length string"data" below is a working example of variable length string packed. I dont
-# know how to unpack I am confused by the %.
-
-str5 = "going to test this"
-str5 = bytes(str5,'utf-8')
-str5_len = len(str5)
-print("str5_len", str5_len)
-val = pack('i%ds' % (len(str5),), len(str5), str5)
-#unpack_val = unpack('i%ds',val)  #this doesn't work
+print("evidence: ", unpack_evidence)
+print("state: ", unpack_state)
+print("length: ", unpack_length)
+print("data: ", unpack_data)
