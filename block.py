@@ -12,7 +12,7 @@ def get_data_length(data):
 class Block: 
 
     # instantiates block for blockchain
-    def __init__(self, previous_hash, case_id, evidence_item_id, state, data, data_length, time_stamp=get_current_time()):
+    def __init__(self, previous_hash, case_id, evidence_item_id, state, data=None, data_length=None, time_stamp=get_current_time()):
         self.previous_hash = previous_hash
         self.case_id = case_id
         self.evidence_item_id = evidence_item_id
