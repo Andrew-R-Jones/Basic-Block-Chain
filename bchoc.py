@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys
+import block
 
 # global list that will hold all blocks and will create the chain
 chain = []
@@ -70,7 +71,12 @@ Sanity check. Only starts up and checks for the initial block.
 '''
 
 def init():
-    print("init function")
+    try:
+        read_from_file()
+    except:
+        print('Blockchain file not found. Created INITIAL block.')
+        b = block.Block(None, None, None, 'INITIAL', 'Initial block')
+        chain.append(b)
     return None
 
 '''
@@ -101,12 +107,10 @@ def run_commands(command):
    
 # saves the list of blocks to a file
 def save_to_file():
-    # for testing
-    blocks = ['block11', 'block22', 'block33', 'block44']
 
     with open('blockchain.txt', 'w') as filehandle:
-        for listitem in blocks:
-            filehandle.write('%s\n' % listitem)
+        for block in chain:
+            filehandle.write('%s\n' % block)
 
 # reads and restores the saved blocks from file, and add to list 'chain'
 def read_from_file():
@@ -120,7 +124,7 @@ def read_from_file():
 
             # add item to the list
             chain.append(item)
-
+    print('Blockchain file found with INITIAL block.')
 
 # initial call from command line
 # ensures enough args given
@@ -133,6 +137,4 @@ commands = sys.argv[1:]
 
 # calls function the run first command
 run_commands(commands[0])
-
-
-
+save_to_file()
