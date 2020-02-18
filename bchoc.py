@@ -46,7 +46,8 @@ def add():
         item_id = commands.pop(0)
 
         add_to_block_chain(case_id, item_id)
-        
+
+    save_to_file()    
 
 
     return None
@@ -104,6 +105,7 @@ Sanity check. Only starts up and checks for the initial block.
 def init():
     try:
         read_from_file()
+        print('Blockchain file found with INITIAL block.')
     except:
         print('Blockchain file not found. Created INITIAL block.')
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
@@ -181,8 +183,6 @@ def read_from_file():
 
 
 
-    print('Blockchain file found with INITIAL block.')
-
 # initial call from command line
 # ensures enough args given
 if len(sys.argv) < 2:
@@ -199,4 +199,4 @@ run_commands(commands[0])
 #save_to_file()
 
 # for testing 
-print(f"BLOCK CHAIN START\n{chain}")
+#print(f"BLOCK CHAIN START\n{chain}")
