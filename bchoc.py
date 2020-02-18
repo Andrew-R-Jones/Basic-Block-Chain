@@ -6,6 +6,26 @@ import block
 # global list that will hold all blocks and will create the chain
 chain = []
 
+# TODO
+# returns true if the item was found in the block chain. false, if it was not found
+def in_chain():
+    return False
+
+# TODO
+# calculates the hash of the parent block 
+def get_parent_hash():
+    return 'parents hash'
+
+
+def add_to_block_chain(case_id, item_id):
+
+    if not in_chain():
+        previous_hash = get_parent_hash()
+        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+        b = block.Block(previous_hash, case_id, item_id, 'CHECKED IN')
+        chain.append(b)
+
+
 '''
 bchoc add -c case_id -i item_id [-i item_id ...]
 Add a new evidence item to the blockchain and associate it with the given case identifier.
@@ -14,10 +34,21 @@ blockchain entry for each item without the need to enter the case_id multiple ti
 of a newly added item is CHECKEDIN. The given evidence ID must be unique
 (i.e., not already used in the blockchain) to be accepted.
 '''
-
-
 def add():
-    print("add function")
+
+    if commands[0] == '-c':
+        case_id = commands[1]
+        commands.pop(0)
+        commands.pop(0)
+
+    while commands:
+        commands.pop(0)
+        item_id = commands.pop(0)
+
+        add_to_block_chain(case_id, item_id)
+        
+
+
     return None
 
 
@@ -91,7 +122,19 @@ def verify():
 
 ''' runs certain function based on the command argument passed in '''
 def run_commands(command):
+
+    if command == 'init':
+        init()
+
+    else:
+        try:
+            read_from_file()
+        except:
+            print("No blockchain initialized.")
+            exit()
+
     if command == 'add':
+        commands.remove('add')
         add()
     elif command == 'checkout':
         checkout()
@@ -101,10 +144,11 @@ def run_commands(command):
         log()
     elif command == 'remove':
         remove()
-    elif command == 'init':
-        init()
+
     elif command == 'verify':
         verify()
+
+    save_to_file()
    
 # saves the list of blocks to a file
 def save_to_file():
@@ -147,11 +191,12 @@ if len(sys.argv) < 2:
 
 # gets the command line arguments
 commands = sys.argv[1:]
+#print(f"commands: {commands}")
 
 # calls function the run first command
 run_commands(commands[0])
 
-save_to_file()
+#save_to_file()
 
 # for testing 
 print(f"BLOCK CHAIN START\n{chain}")
