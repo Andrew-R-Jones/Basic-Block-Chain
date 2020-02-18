@@ -75,7 +75,8 @@ def init():
         read_from_file()
     except:
         print('Blockchain file not found. Created INITIAL block.')
-        b = block.Block(None, None, None, 'INITIAL', 'Initial block')
+        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
         chain.append(b)
     return None
 
@@ -112,9 +113,11 @@ def save_to_file():
         for block in chain:
             filehandle.write('%s\n' % block)
 
+
 # reads and restores the saved blocks from file, and add to list 'chain'
 def read_from_file():
-
+    l = []
+    count = 0
     # define an empty list
     # open file and read the content in a list
     with open('blockchain.txt', 'r') as filehandle:
@@ -123,7 +126,17 @@ def read_from_file():
             item = line[:-1]
 
             # add item to the list
-            chain.append(item)
+            l.append(item)
+            count = count + 1
+
+            if count == 7:
+                b = block.Block(l[0], l[2], l[3], l[4], l[5], l[6] ,time_stamp=l[1])
+                chain.append(b)
+                l = []
+                count = 0
+
+
+
     print('Blockchain file found with INITIAL block.')
 
 # initial call from command line
@@ -137,4 +150,8 @@ commands = sys.argv[1:]
 
 # calls function the run first command
 run_commands(commands[0])
+
 save_to_file()
+
+# for testing 
+print(f"BLOCK CHAIN START\n{chain}")
