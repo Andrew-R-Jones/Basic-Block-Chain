@@ -18,13 +18,9 @@ def in_chain():
 # calculates the hash of the parent block, assumes the last block is the parent 
 # since a block can only be added to the end of the chain
 def get_last_block_hash():
-    
     last_block = chain[-1]
-    sha1 = hashlib.sha1()
-    print(f"sha1 b4 {sha1}")
-    sha1.update(last_block)
-    print(f"sha1 after {sha1}")
-
+    sha1 = hashlib.sha1(repr(last_block).encode('utf-8')).hexdigest()
+    return sha1
 
 
 def add_to_block_chain(case_id, item_id):
@@ -58,7 +54,6 @@ def add():
         add_to_block_chain(case_id, item_id)
 
     save_to_file()    
-
 
     return None
 
