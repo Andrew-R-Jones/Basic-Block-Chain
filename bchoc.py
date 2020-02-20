@@ -181,7 +181,8 @@ def read_from_file():
             count = count + 1
 
             if count == 7:
-                b = block.Block(l[0], l[2], l[3], l[4], l[5], l[6] ,time_stamp=l[1])
+                #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5] , time_stamp=l[1])
                 chain.append(b)
                 l = []
                 count = 0
