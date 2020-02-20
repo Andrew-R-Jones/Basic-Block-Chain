@@ -9,23 +9,29 @@ import hashlib
 chain = []
  
 
-# TODO
 # returns true if the item was found in the block chain. false, if it was not found
-def in_chain():
+def in_chain(item_id):
+
+    for block in chain:
+        if item_id == block.evidence_item_id:
+            return True
+            
     return False
 
 # TODO
 # calculates the hash of the parent block, assumes the last block is the parent 
 # since a block can only be added to the end of the chain
 def get_last_block_hash():
+
     last_block = chain[-1]
     sha1 = hashlib.sha1(repr(last_block).encode('utf-8')).hexdigest()
+
     return sha1
 
 
 def add_to_block_chain(case_id, item_id):
 
-    if not in_chain():
+    if not in_chain(item_id):
         previous_hash = get_last_block_hash()
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         b = block.Block(previous_hash, case_id, item_id, 'CHECKED IN')
