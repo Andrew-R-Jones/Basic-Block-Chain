@@ -7,7 +7,7 @@ import hashlib
 
 # global list that will hold all blocks and will create the chain
 chain = []
- 
+
 
 # returns true if the item was found in the block chain. false, if it was not found
 def in_chain(item_id):
@@ -15,11 +15,11 @@ def in_chain(item_id):
     for block in chain:
         if item_id == block.evidence_item_id:
             return True
-            
+
     return False
 
 # TODO
-# calculates the hash of the parent block, assumes the last block is the parent 
+# calculates the hash of the parent block, assumes the last block is the parent
 # since a block can only be added to the end of the chain
 def get_last_block_hash():
 
@@ -59,7 +59,7 @@ def add():
 
         add_to_block_chain(case_id, item_id)
 
-    save_to_file()    
+    save_to_file()
 
     return None
 
@@ -129,7 +129,10 @@ bchoc verify
 Parse the blockchain and validate all entries.
 '''
 def verify():
-    print("verify function")
+
+    
+    print("Transactions in blockchain: " + str(len(chain)))
+
     return None
 
 
@@ -162,7 +165,7 @@ def run_commands(command):
         verify()
 
     save_to_file()
-   
+
 # saves the list of blocks to a file
 def save_to_file():
 
@@ -210,5 +213,5 @@ run_commands(commands[0])
 
 #save_to_file()
 
-# for testing 
+# for testing
 #print(f"BLOCK CHAIN START\n{chain}")
