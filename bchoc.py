@@ -134,6 +134,7 @@ def verify():
     isClean = True
     for block in chain:
         if block.state == 'ERROR':
+            isClean = False
             print("There is an error")
     if isClean == True:
         print("State of blockchain: CLEAN")
