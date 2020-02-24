@@ -168,7 +168,15 @@ bchoc verify
 Parse the blockchain and validate all entries.
 '''
 def verify():
-    print("verify function")
+
+    print("Transactions in blockchain: " + str(len(chain)))
+    isClean = True
+    for block in chain:
+        if block.state == 'ERROR':
+            isClean = False
+            print("There is an error")
+    if isClean == True:
+        print("State of blockchain: CLEAN")
     return None
 
 
