@@ -7,7 +7,7 @@ import hashlib
 
 # global list that will hold all blocks and will create the chain
 chain = []
- 
+
 
 # returns true if the item was found in the block chain. false, if it was not found
 def in_chain(item_id):
@@ -15,11 +15,11 @@ def in_chain(item_id):
     for block in chain:
         if item_id == block.evidence_item_id:
             return True
-            
+
     return False
 
 # TODO
-# calculates the hash of the parent block, assumes the last block is the parent 
+# calculates the hash of the parent block, assumes the last block is the parent
 # since a block can only be added to the end of the chain
 def get_last_block_hash():
 
@@ -34,7 +34,7 @@ def add_to_block_chain(case_id, item_id):
     if not in_chain(item_id):
         previous_hash = get_last_block_hash()
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        b = block.Block(previous_hash, case_id, item_id, 'CHECKED IN')
+        b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
         chain.append(b)
 
 
@@ -52,14 +52,19 @@ def add():
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
-
+        print("Case: " + case_id)
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
 
         add_to_block_chain(case_id, item_id)
+        print("Added item: " + item_id)
+        for block in chain:
+            if block.evidence_item_id == item_id:
+                print(" Status: " + block.state)
+                print(" Time of action: " + block.time_stamp)
 
-    save_to_file()    
+    save_to_file()
 
     return None
 
@@ -162,7 +167,7 @@ def run_commands(command):
         verify()
 
     save_to_file()
-   
+
 # saves the list of blocks to a file
 def save_to_file():
 
@@ -210,5 +215,5 @@ run_commands(commands[0])
 
 #save_to_file()
 
-# for testing 
+# for testing
 #print(f"BLOCK CHAIN START\n{chain}")
