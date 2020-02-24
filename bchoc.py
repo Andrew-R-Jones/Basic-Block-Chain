@@ -53,12 +53,17 @@ def add():
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
-
+        print("Case: " + case_id)
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
 
         add_to_block_chain(case_id, item_id)
+        print("Added item: " + item_id)
+        for block in chain:
+            if block.evidence_item_id == item_id:
+                print(" Status: " + block.state)
+                print(" Time of action: " + block.time_stamp)
 
     save_to_file()
 
