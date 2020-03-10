@@ -144,7 +144,46 @@ item must have a state of CHECKEDIN for the action to succeed.
 '''
 
 def remove():
-    print("remove function")
+    
+    if commands[0] == '-i':
+        commands.pop(0)
+        item_id = commands[0]
+        commands.pop(0)
+        for block in chain:
+            if item_id == block.evidence_item_id:
+                if commands[0] == '-y' or commands[0] == '--why':
+                    commands.pop(0)
+                    state = commands[0]
+                    if state == 'RELEASED':
+                        commands.pop(0)
+                        if commands[0] == '-o':
+                            commands.pop(0)
+                            block.data = commands[0].strip('\"')
+                            block.state = state
+                        else:
+                            print("Need to add -o REASON")
+                            return 1
+                    elif state == 'DISPOSED' or state == 'DESTROYED':
+                        block.state = state
+                    else:
+                        print("Invalid entry")
+                        return 1
+                else:
+                    print("Invalid Syntax")
+                    return 1
+                block.time_stamp = get_current_time()
+                print("Case: " + block.case_id)
+                print("Removed item: " + block.evidence_item_id)
+                print(  "Status: " + block.state)
+                print(  "Owner info: " + block.data)
+                print(  "Time of action: " + block.time_stamp)
+            else:
+                print("Item id not found")
+                return 1
+    else:
+        print("Invalid Syntax")
+        return 1
+
     return None
 
 '''
@@ -205,6 +244,7 @@ def run_commands(command):
     elif command == 'log':
         log()
     elif command == 'remove':
+        commands.remove('remove')
         remove()
 
     elif command == 'verify':
