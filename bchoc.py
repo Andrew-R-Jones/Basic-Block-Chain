@@ -180,9 +180,9 @@ def remove():
                 block.time_stamp = get_current_time()
                 print("Case: " + block.case_id)
                 print("Removed item: " + block.evidence_item_id)
-                print("Status: " + block.state)
-                print("Owner info: " + block.data)
-                print("Time of action: " + block.time_stamp)
+                print("  Status: " + block.state)
+                print("  Owner info: " + block.data)
+                print("  Time of action: " + block.time_stamp)
                 return None
 
         print("Item id not found")
