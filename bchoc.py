@@ -22,6 +22,8 @@ def in_chain(item_id):
 # TODO
 # calculates the hash of the parent block, assumes the last block is the parent
 # since a block can only be added to the end of the chain
+
+
 def get_last_block_hash():
 
     last_block = chain[-1]
@@ -47,6 +49,8 @@ blockchain entry for each item without the need to enter the case_id multiple ti
 of a newly added item is CHECKEDIN. The given evidence ID must be unique
 (i.e., not already used in the blockchain) to be accepted.
 '''
+
+
 def add():
 
     if commands[0] == '-c':
@@ -92,7 +96,7 @@ def checkout():
                     print("  Time of action: " + str(block.time_stamp))
                 else:
                     print("Error: Cannot check out a checked out item. " +
-                    "Must check it in first.")
+                          "Must check it in first.")
                     return 1
     else:
         print("Invalid command")
@@ -137,14 +141,16 @@ def log():
     print("log function")
     return None
 
+
 '''
 bchoc remove -i item_id -y reason [-o owner]
 Prevents any further action from being taken on the evidence item specified. The specified
 item must have a state of CHECKEDIN for the action to succeed.
 '''
 
+
 def remove():
-    
+
     if commands[0] == '-i':
         commands.pop(0)
         item_id = commands[0]
@@ -174,22 +180,25 @@ def remove():
                 block.time_stamp = get_current_time()
                 print("Case: " + block.case_id)
                 print("Removed item: " + block.evidence_item_id)
-                print(  "Status: " + block.state)
-                print(  "Owner info: " + block.data)
-                print(  "Time of action: " + block.time_stamp)
-            else:
-                print("Item id not found")
-                return 1
+                print("Status: " + block.state)
+                print("Owner info: " + block.data)
+                print("Time of action: " + block.time_stamp)
+                return None
+
+        print("Item id not found")
+        return 1
     else:
         print("Invalid Syntax")
         return 1
 
     return None
 
+
 '''
 bchoc init
 Sanity check. Only starts up and checks for the initial block.
 '''
+
 
 def init():
     try:
@@ -202,10 +211,13 @@ def init():
         chain.append(b)
     return None
 
+
 '''
 bchoc verify
 Parse the blockchain and validate all entries.
 '''
+
+
 def verify():
 
     print("Transactions in blockchain: " + str(len(chain)))
@@ -220,6 +232,8 @@ def verify():
 
 
 ''' runs certain function based on the command argument passed in '''
+
+
 def run_commands(command):
 
     if command == 'init':
@@ -253,6 +267,8 @@ def run_commands(command):
     save_to_file()
 
 # saves the list of blocks to a file
+
+
 def save_to_file():
 
     with open('blockchain.txt', 'w') as filehandle:
@@ -277,11 +293,10 @@ def read_from_file():
 
             if count == 7:
                 #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5] , time_stamp=l[1])
+                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
                 chain.append(b)
                 l = []
                 count = 0
-
 
 
 # initial call from command line
@@ -297,7 +312,7 @@ commands = sys.argv[1:]
 # calls function the run first command
 run_commands(commands[0])
 
-#save_to_file()
+# save_to_file()
 
 # for testing
 #print(f"BLOCK CHAIN START\n{chain}")
