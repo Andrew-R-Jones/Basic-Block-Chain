@@ -138,7 +138,13 @@ Display the blockchain entries giving the oldest first (unless -r is given).
 
 
 def log():
-    print("log function")
+    isReversed = False
+    numInChain = 0
+    if commands[0] == '-r' or commands[0] == '--reverse':
+        reverse = chain[::-1]
+        for i in reverse:
+            print(i)
+
     return None
 
 
@@ -256,6 +262,7 @@ def run_commands(command):
         commands.remove('checkin')
         checkin()
     elif command == 'log':
+        commands.remove('log')
         log()
     elif command == 'remove':
         commands.remove('remove')
