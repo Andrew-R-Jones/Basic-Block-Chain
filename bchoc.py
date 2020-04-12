@@ -207,16 +207,21 @@ Sanity check. Only starts up and checks for the initial block.
 
 
 def init():
-    try:
-        read_from_file()
-        print('Blockchain file found with INITIAL block.')
-    except:
-        print('Blockchain file not found. Created INITIAL block.')
-        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
-        chain.append(b)
-    return None
 
+    commands.pop()
+    if not commands:
+        try:
+            read_from_file()
+            print('Blockchain file found with INITIAL block.')
+        except:
+            print('Blockchain file not found. Created INITIAL block.')
+            # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+            b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
+            chain.append(b)
+        return None
+    else:
+        print("Too many arguments")
+        exit(1)
 
 '''
 bchoc verify
