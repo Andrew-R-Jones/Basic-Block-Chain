@@ -205,8 +205,10 @@ def remove():
         commands.pop(0)
         item_id = commands[0]
         commands.pop(0)
-        for block in chain:
-            if item_id == block.evidence_item_id:
+        for b in chain[::-1]:
+            if item_id == b.evidence_item_id:
+                if b.state != "CHECKEDIN":
+                    return
                 if commands[0] == '-y' or commands[0] == '--why':
                     commands.pop(0)
                     state = commands[0]
@@ -214,25 +216,30 @@ def remove():
                         commands.pop(0)
                         if commands[0] == '-o':
                             commands.pop(0)
-                            block.data = commands[0].strip('\"')
-                            block.state = state
+                            new_block_data = commands[0].strip('\"')
+                            new_block_state = state
                         else:
                             print("Need to add -o REASON")
                             return 1
                     elif state == 'DISPOSED' or state == 'DESTROYED':
-                        block.state = state
+                        new_block_state = state
                     else:
                         print("Invalid entry")
                         return 1
                 else:
                     print("Invalid Syntax")
                     return 1
-                block.time_stamp = get_current_time()
-                print("Case: " + block.case_id)
-                print("Removed item: " + block.evidence_item_id)
-                print("  Status: " + block.state)
-                print("  Owner info: " + block.data)
-                print("  Time of action: " + block.time_stamp)
+                print("Case: " + b.case_id)
+                print("Removed item: " + b.evidence_item_id)
+                print("  Status: " + new_block_state)
+                print("  Owner info: " + new_block_data)
+                print("  Time of action: " + b.time_stamp)
+
+                previous_hash = get_last_block_hash()
+                # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, new_block_state, new_block_data, len(new_block_data.encode('utf-8')) + 1)
+                chain.append(new_block)
+
                 return None
 
         print("Item id not found")
