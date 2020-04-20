@@ -83,18 +83,30 @@ may only be performed on evidence items that have already been added to the bloc
 
 def checkout():
 
+    # need to find the last block with item_id i, and check whether it is checked in or checked out
+    # iterate from the last element in reverse to find that element
+
     if commands[0] == '-i':
         item_id = commands[1]
-        for block in chain:
-            if item_id == block.evidence_item_id:
-                if block.state == 'CHECKEDIN':
-                    block.state = 'CHECKEDOUT'
-                    block.time_stamp = get_current_time()
-                    print("Case: " + block.case_id)
-                    print("Checked out item: " + block.evidence_item_id)
-                    print("  Status: " + block.state)
-                    print("  Time of action: " + str(block.time_stamp))
-                else:
+
+        reverse_chain = chain[::-1]
+     
+        for b in reverse_chain:
+            if item_id == b.evidence_item_id:
+                if b.state == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
+                    
+                    previous_hash = get_last_block_hash()
+                    # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                    new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
+                    chain.append(new_block)
+                    print("Case: " + new_block.case_id)
+                    print("Checked out item: " + new_block.evidence_item_id)
+                    print("  Status: " + new_block.state)
+                    print("  Time of action: " + str(new_block.time_stamp))
+                    
+                    return
+
+                elif b.state == 'CHECKEDOUT':
                     print("Error: Cannot check out a checked out item. " +
                           "Must check it in first.")
                     return 1
