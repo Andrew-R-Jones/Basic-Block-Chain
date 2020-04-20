@@ -128,14 +128,27 @@ def checkin():
 
     if commands[0] == '-i':
         item_id = commands[1]
-        for block in chain:
-            if item_id == block.evidence_item_id:
+        for b in chain:
+            if item_id == b.evidence_item_id:
+
+                previous_hash = get_last_block_hash()
+                # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDIN')
+                chain.append(new_block)
+                print("Case: " + new_block.case_id)
+                print("Checked in item: " + new_block.evidence_item_id)
+                print("  Status: " + new_block.state)
+                print("  Time of action: " + str(new_block.time_stamp))
+                return
+
+                '''
                 block.state = 'CHECKEDIN'
                 block.time_stamp = get_current_time()
                 print("Case: " + block.case_id)
                 print("Checked in item: " + block.evidence_item_id)
                 print("  Status: " + block.state)
                 print("  Time of action: " + str(block.time_stamp))
+                '''
     else:
         print("Invalid command")
         return 1
@@ -149,13 +162,32 @@ Display the blockchain entries giving the oldest first (unless -r is given).
 '''
 
 
-def log():
-    isReversed = False
-    numInChain = 0
-    if commands[0] == '-r' or commands[0] == '--reverse':
-        reverse = chain[::-1]
-        for i in reverse:
-            print(i)
+def log(reverse, num_entries, item_id):
+
+    count = 0
+
+    # -1 means no -n amount was entered 
+    if num_entries == -1:
+        num_entries = len(chain)
+
+    # reverse if -r was used
+    if reverse:
+        c = chain[::-1]
+    else:
+        c = chain
+
+    for block in c:
+        
+        if item_id == block.evidence_item_id:
+            count = count + 1
+            print("Case: " + block.case_id)
+            print("Item: " + block.evidence_item_id)
+            print("Action: " + block.state)
+            print("Time of action: " + block.time_stamp)
+            print("")
+            if count == num_entries:
+                return
+
 
     return None
 
@@ -280,7 +312,25 @@ def run_commands(command):
         checkin()
     elif command == 'log':
         commands.remove('log')
-        log()
+        if commands[0] == '-r' or commands[0] == '--reverse':
+            reverse = True
+            commands.pop(0)
+        else:
+            reverse = False
+        if commands[0] == '-n':
+            num_entries = int(commands[1])
+            commands.pop(0)
+            commands.pop(0)
+        else:
+            num_entries = -1
+
+        if commands[0] == '-i':
+            item_id = commands[1]
+        else:
+            print("no item id provided")
+            return
+        log(reverse, num_entries, item_id)
+
     elif command == 'remove':
         commands.remove('remove')
         remove()
