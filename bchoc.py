@@ -10,12 +10,12 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
+#file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain.txt'
+file_path = 'blockchain.txt'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -300,20 +300,16 @@ Sanity check. Only starts up and checks for the initial block.
 
 def init():
 
-    commands.pop()
-    if not commands:
-        try:
-            read_from_file()
-            print('Blockchain file found with INITIAL block.')
-        except:
-            print('Blockchain file not found. Created INITIAL block.')
-            # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-            b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
-            chain.append(b)
-        return None
-    else:
-        print("Too many arguments")
-        exit(1)
+    try:
+        read_from_file()
+        print('Blockchain file found with INITIAL block.')
+    except:
+        print('Blockchain file not found. Created INITIAL block.')
+        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
+        chain.append(b)
+    return None
+
 
 '''
 bchoc verify
@@ -340,14 +336,19 @@ def verify():
 def run_commands(command):
 
     if command == 'init':
+        commands.pop()
         init()
+        exit(0)
 
     else:
         try:
             read_from_file()
         except:
-            print("No blockchain initialized.")
-            exit()
+            if command == 'add':
+                init()
+            else:
+                print("No blockchain initialized.")
+                exit()
 
     if command == 'add':
         commands.remove('add')
