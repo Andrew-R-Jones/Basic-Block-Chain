@@ -10,12 +10,12 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
+#file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain.txt'
+file_path = 'blockchain.txt'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -307,29 +307,10 @@ def init():
     except:
         return
 
-
-
-    commands.pop()
-    if not commands:
-        try:
-            read_from_file()
-            print('Blockchain file found with INITIAL block.')
-        except:
-            print('Blockchain file not found. Created INITIAL block.')
-            # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-            b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
-            chain.append(b)
-        return None
-    else:
-        print("Too many arguments")
-        exit(1)
-
 '''
 bchoc verify
 Parse the blockchain and validate all entries.
 '''
-
-
 def verify():
 
     print("Transactions in blockchain: " + str(len(chain)))
@@ -350,6 +331,7 @@ def run_commands(command):
 
     if command == 'init':
         init()
+        exit(0)
 
     else:
         try:
@@ -431,7 +413,7 @@ def read_from_file():
                     l = []
                     count = 0
 
-            print('Blockchain file found with INITIAL block.')
+        print('Blockchain file found with INITIAL block.')
     except:
         print('Blockchain file not found. Created INITIAL block.')
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
