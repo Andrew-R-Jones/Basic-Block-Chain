@@ -309,7 +309,6 @@ def init():
 
     try:
         read_from_file()
-        print('Blockchain file found with INITIAL block.')
     except:
         return
 
@@ -404,6 +403,8 @@ def read_from_file():
 
     try:
         with open(file_path, 'r') as filehandle:
+            print('Blockchain file found with INITIAL block.')
+
             for line in filehandle:
                 # remove linebreak which is the last character of the string
                 item = line[:-1]
