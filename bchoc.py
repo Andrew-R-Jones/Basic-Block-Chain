@@ -20,6 +20,7 @@ file_path = 'blockchain.txt'
 
 # global list that will hold all blocks and will create the chain
 chain = []
+inital_file_create = False
 
 
 # returns true if the item was found in the block chain. false, if it was not found
@@ -76,13 +77,17 @@ of a newly added item is CHECKEDIN. The given evidence ID must be unique
 
 
 def add():
-
+   
     if commands[0] == '-c':
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
     else:
         exit(1)
+
+    if not inital_file_create:
+        init()
+    
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
@@ -343,12 +348,16 @@ def run_commands(command):
     else:
         try:
             read_from_file()
+            inital_file_create = True
         except:
+            inital_file_create = False
             if command == 'add':
-                init()
+                commands.remove('add')
+                add()
+                exit(0)
             else:
                 print("No blockchain initialized.")
-                exit()
+                exit(0)
 
     if command == 'add':
         commands.remove('add')
