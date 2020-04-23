@@ -3,8 +3,11 @@
 import sys
 import block
 import hashlib
+import os
 
 from block import get_current_time
+
+file_path = os.environ["BCHOC_FILE_PATH"]
 
 # global list that will hold all blocks and will create the chain
 chain = []
@@ -26,7 +29,7 @@ def in_chain(item_id):
     # exit with error code if the block was in the chain and it was already released
     if previously_removed:
         exit(1)
-    else: 
+    else:
         return found
 
 # TODO
@@ -82,7 +85,7 @@ def add():
                     print(" Status: " + block.state)
                     print(" Time of action: " + block.time_stamp)
         # exits with error if the item id was already added to the blockchain
-        else: 
+        else:
             exit(1)
 
     save_to_file()
@@ -106,11 +109,11 @@ def checkout():
         item_id = commands[1]
 
         reverse_chain = chain[::-1]
-     
+
         for b in reverse_chain:
             if item_id == b.evidence_item_id:
                 if b.state == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-                    
+
                     previous_hash = get_last_block_hash()
                     # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
                     new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
@@ -119,7 +122,7 @@ def checkout():
                     print("Checked out item: " + new_block.evidence_item_id)
                     print("  Status: " + new_block.state)
                     print("  Time of action: " + str(new_block.time_stamp))
-                    
+
                     return
 
                 elif b.state == 'CHECKEDOUT':
@@ -182,7 +185,7 @@ def log(reverse, num_entries, item_id):
 
     count = 0
 
-    # -1 means no -n amount was entered 
+    # -1 means no -n amount was entered
     if num_entries == -1:
         num_entries = len(chain)
 
@@ -193,7 +196,7 @@ def log(reverse, num_entries, item_id):
         c = chain
 
     for block in c:
-        
+
         if item_id == block.evidence_item_id:
             count = count + 1
             print("Case: " + block.case_id)
@@ -379,7 +382,7 @@ def run_commands(command):
 
 def save_to_file():
 
-    with open('blockchain.txt', 'w') as filehandle:
+    with open(file_path, 'w') as filehandle:
         for block in chain:
             filehandle.write('%s\n' % block)
 
@@ -390,7 +393,7 @@ def read_from_file():
     count = 0
     # define an empty list
     # open file and read the content in a list
-    with open('blockchain.txt', 'r') as filehandle:
+    with open(file_path, 'r') as filehandle:
         for line in filehandle:
             # remove linebreak which is the last character of the string
             item = line[:-1]
