@@ -1,7 +1,9 @@
-import maya
+#import maya
+import datetime
 
 def get_current_time():
-    return (maya.now()).iso8601()
+    return datetime.datetime.now().isoformat()
+    #return (maya.now()).iso8601()
 
 
 def get_data_length(data):
