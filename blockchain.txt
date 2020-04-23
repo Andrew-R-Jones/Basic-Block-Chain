@@ -1,7 +1,0 @@
-None
-2020-04-22T22:50:50.587448
-None
-None
-INITIAL
-14
-Initial block
