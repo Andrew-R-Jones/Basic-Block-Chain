@@ -139,7 +139,9 @@ def checkout():
                 elif b.state == 'CHECKEDOUT':
                     print("Error: Cannot check out a checked out item. " +
                           "Must check it in first.")
-                    return 1
+                    #return 1
+                    exit(1) #changed by Jared, if you do echo $? it says 0 unless
+                    # you specify exit(1) instead of return 1
     else:
         print("Invalid command")
         return 1
