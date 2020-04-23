@@ -11,13 +11,23 @@ chain = []
 
 
 # returns true if the item was found in the block chain. false, if it was not found
+# return exit code 1 if the block was found in the chain with a released state
 def in_chain(item_id):
+
+    found = False
+    previously_removed = False
 
     for block in chain:
         if item_id == block.evidence_item_id:
-            return True
+            found = True
+            if block.state == 'RELEASED' or block.state == 'DISPOSED' or block.state == 'DESTROYED':
+                previously_removed = True
 
-    return False
+    # exit with error code if the block was in the chain and it was already released
+    if previously_removed:
+        exit(1)
+    else: 
+        return found
 
 # TODO
 # calculates the hash of the parent block, assumes the last block is the parent
@@ -39,6 +49,8 @@ def add_to_block_chain(case_id, item_id):
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
         chain.append(b)
+        return True
+    else: return False
 
 
 '''
@@ -57,17 +69,21 @@ def add():
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
-        print("Case: " + case_id)
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
 
-        add_to_block_chain(case_id, item_id)
-        print("Added item: " + item_id)
-        for block in chain:
-            if block.evidence_item_id == item_id:
-                print(" Status: " + block.state)
-                print(" Time of action: " + block.time_stamp)
+        if add_to_block_chain(case_id, item_id):
+
+            print("Case: " + case_id)
+            print("Added item: " + item_id)
+            for block in chain:
+                if block.evidence_item_id == item_id:
+                    print(" Status: " + block.state)
+                    print(" Time of action: " + block.time_stamp)
+        # exits with error if the item id was already added to the blockchain
+        else: 
+            exit(1)
 
     save_to_file()
 
@@ -201,6 +217,8 @@ item must have a state of CHECKEDIN for the action to succeed.
 
 def remove():
 
+    released = False
+
     if commands[0] == '-i':
         commands.pop(0)
         item_id = commands[0]
@@ -213,16 +231,16 @@ def remove():
                     commands.pop(0)
                     state = commands[0]
                     if state == 'RELEASED':
+                        released = True
                         commands.pop(0)
                         if commands[0] == '-o':
                             commands.pop(0)
                             new_block_data = commands[0].strip('\"')
-                            new_block_state = state
                         else:
                             print("Need to add -o REASON")
                             return 1
                     elif state == 'DISPOSED' or state == 'DESTROYED':
-                        new_block_state = state
+                        state = state
                     else:
                         print("Invalid entry")
                         return 1
@@ -231,13 +249,22 @@ def remove():
                     return 1
                 print("Case: " + b.case_id)
                 print("Removed item: " + b.evidence_item_id)
-                print("  Status: " + new_block_state)
-                print("  Owner info: " + new_block_data)
+                print("  Status: " + state)
+                if released:
+                    print("  Owner info: " + state)
                 print("  Time of action: " + b.time_stamp)
 
                 previous_hash = get_last_block_hash()
                 # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, new_block_state, new_block_data, len(new_block_data.encode('utf-8')) + 1)
+
+                if released:
+                    new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, state, new_block_data, len(
+                    new_block_data.encode('utf-8')) + 1)
+
+                else:
+                    new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, state)
+
+
                 chain.append(new_block)
 
                 return None
