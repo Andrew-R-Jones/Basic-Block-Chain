@@ -8,15 +8,14 @@ import os
 from block import get_current_time
 
 
-
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain.txt'
+#file_path = 'blockchain.txt'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -78,18 +77,12 @@ of a newly added item is CHECKEDIN. The given evidence ID must be unique
 
 def add():
 
-    # checks for case id and following argument
     if commands[0] == '-c':
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
     else:
         exit(1)
-    
-    # checks for item id and following argument
-    if len(commands) < 2:
-        exit(1)
-
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
@@ -146,7 +139,9 @@ def checkout():
                 elif b.state == 'CHECKEDOUT':
                     print("Error: Cannot check out a checked out item. " +
                           "Must check it in first.")
-                    return 1
+                    #return 1
+                    exit(1) #changed by Jared, if you do echo $? it says 0 unless
+                    # you specify exit(1) instead of return 1
     else:
         print("Invalid command")
         return 1
@@ -314,6 +309,21 @@ def init():
 
 
 
+    commands.pop()
+    if not commands:
+        try:
+            read_from_file()
+            print('Blockchain file found with INITIAL block.')
+        except:
+            print('Blockchain file not found. Created INITIAL block.')
+            # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+            b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
+            chain.append(b)
+        return None
+    else:
+        print("Too many arguments")
+        exit(1)
+
 '''
 bchoc verify
 Parse the blockchain and validate all entries.
@@ -339,22 +349,14 @@ def verify():
 def run_commands(command):
 
     if command == 'init':
-        commands.pop()
         init()
-        exit(0)
 
     else:
         try:
             read_from_file()
         except:
-            print(command)
-            if command == 'add':
-                commands.remove('add')
-                add()
-                exit(0)
-            else:
-                print("No blockchain initialized.")
-                exit(0)
+            print("No blockchain initialized.")
+            exit()
 
     if command == 'add':
         commands.remove('add')
@@ -411,6 +413,7 @@ def read_from_file():
     count = 0
     # define an empty list
     # open file and read the content in a list
+
     try:
         with open(file_path, 'r') as filehandle:
             for line in filehandle:
@@ -436,6 +439,22 @@ def read_from_file():
         chain.append(b)
         save_to_file()
 
+    with open(file_path, 'r') as filehandle:
+        for line in filehandle:
+            # remove linebreak which is the last character of the string
+            item = line[:-1]
+
+            # add item to the list
+            l.append(item)
+            count = count + 1
+
+            if count == 7:
+                #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
+                chain.append(b)
+                l = []
+                count = 0
+
 
 # initial call from command line
 # ensures enough args given
@@ -449,6 +468,7 @@ commands = sys.argv[1:]
 
 # calls function the run first command
 run_commands(commands[0])
+
 # save_to_file()
 
 # for testing
