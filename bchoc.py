@@ -81,6 +81,9 @@ def add():
                 if block.evidence_item_id == item_id:
                     print(" Status: " + block.state)
                     print(" Time of action: " + block.time_stamp)
+        # exits with error if the item id was already added to the blockchain
+        else: 
+            exit(1)
 
     save_to_file()
 
