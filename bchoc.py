@@ -83,6 +83,10 @@ def add():
         commands.pop(0)
     else:
         exit(1)
+
+    if len(commands) < 2:
+        exit(1)
+
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
@@ -97,6 +101,7 @@ def add():
                     print(" Time of action: " + block.time_stamp)
         # exits with error if the item id was already added to the blockchain
         else:
+            print('no item id')
             exit(1)
 
     save_to_file()
