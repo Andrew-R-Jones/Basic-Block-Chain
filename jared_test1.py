@@ -11,7 +11,6 @@ import sys
 128bit UUID, structs can only have 64 bits q long long unsigned. send 2 unisgned 64 bit ints and then
 unpack them using bit shifting. we cant use strings because its 32 character hence 32 bytes needs to
 be 16 bytes.sdqqisis
-test push
 """
 hash = "12345678901234567890" #20byte length hash
 hash = bytes(hash, 'utf-8')
