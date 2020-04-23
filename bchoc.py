@@ -8,6 +8,7 @@ import os
 from block import get_current_time
 
 
+
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
 #file_path = os.environ["BCHOC_FILE_PATH"]
@@ -20,7 +21,6 @@ file_path = 'blockchain.txt'
 
 # global list that will hold all blocks and will create the chain
 chain = []
-inital_file_create = False
 
 
 # returns true if the item was found in the block chain. false, if it was not found
@@ -77,17 +77,19 @@ of a newly added item is CHECKEDIN. The given evidence ID must be unique
 
 
 def add():
-   
+
+    # checks for case id and following argument
     if commands[0] == '-c':
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
     else:
         exit(1)
-
-    if not inital_file_create:
-        init()
     
+    # checks for item id and following argument
+    if len(commands) < 2:
+        exit(1)
+
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
@@ -348,9 +350,8 @@ def run_commands(command):
     else:
         try:
             read_from_file()
-            inital_file_create = True
         except:
-            inital_file_create = False
+            print(command)
             if command == 'add':
                 commands.remove('add')
                 add()
@@ -414,21 +415,27 @@ def read_from_file():
     count = 0
     # define an empty list
     # open file and read the content in a list
-    with open(file_path, 'r') as filehandle:
-        for line in filehandle:
-            # remove linebreak which is the last character of the string
-            item = line[:-1]
+    try:
+        with open(file_path, 'r') as filehandle:
+            for line in filehandle:
+                # remove linebreak which is the last character of the string
+                item = line[:-1]
 
-            # add item to the list
-            l.append(item)
-            count = count + 1
+                # add item to the list
+                l.append(item)
+                count = count + 1
 
-            if count == 7:
-                #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
-                chain.append(b)
-                l = []
-                count = 0
+                if count == 7:
+                    #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+                    b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
+                    chain.append(b)
+                    l = []
+                    count = 0
+    except:
+        print('Blockchain file not found. Created INITIAL block.')
+        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
+        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
+        chain.append(b)
 
 
 # initial call from command line
@@ -443,7 +450,6 @@ commands = sys.argv[1:]
 
 # calls function the run first command
 run_commands(commands[0])
-
 # save_to_file()
 
 # for testing
