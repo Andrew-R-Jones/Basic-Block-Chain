@@ -10,12 +10,12 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain.txt'
+#file_path = 'blockchain.txt'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -81,6 +81,8 @@ def add():
         case_id = commands[1]
         commands.pop(0)
         commands.pop(0)
+    else:
+        exit(1)
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
