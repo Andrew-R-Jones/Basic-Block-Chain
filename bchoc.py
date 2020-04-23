@@ -304,6 +304,7 @@ def init():
 
     try:
         read_from_file()
+        print('Blockchain file found with INITIAL block.')
     except:
         return
 
@@ -412,31 +413,12 @@ def read_from_file():
                     chain.append(b)
                     l = []
                     count = 0
-
-        print('Blockchain file found with INITIAL block.')
     except:
         print('Blockchain file not found. Created INITIAL block.')
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
         chain.append(b)
         save_to_file()
-
-    with open(file_path, 'r') as filehandle:
-        for line in filehandle:
-            # remove linebreak which is the last character of the string
-            item = line[:-1]
-
-            # add item to the list
-            l.append(item)
-            count = count + 1
-
-            if count == 7:
-                #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
-                chain.append(b)
-                l = []
-                count = 0
-
 
 # initial call from command line
 # ensures enough args given
