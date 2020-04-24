@@ -395,13 +395,16 @@ def verify():
 
     print("Transactions in blockchain: " + str(len(chain)))
     # check for correct parent hashes. 
-    #verify_parent_hashes()
-    check_duplicate_parents()
-
+    if check_duplicate_parents():
+        exit(1)
+    elif verify_parent_hashes():
+        exit(1)
+    else:
+        print('State of blockchain: CLEAN')
 
     # check that contents and checksum match
 
-    #if not error: print('State of blockchain: CLEAN')
+
 
 ''' runs certain function based on the command argument passed in '''
 
