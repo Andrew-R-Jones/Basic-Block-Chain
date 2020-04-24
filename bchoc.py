@@ -237,6 +237,8 @@ def log(reverse, num_entries, item_id):
 
     for block in c:
 
+        # iterate through the chain and display the blocks with specified item id's information
+        # if num_entries was provided the for loop iterates n times, otherwise it iterates the entire chain
         if item_id == block.evidence_item_id:
             count = count + 1
             print("Case: " + block.case_id)
@@ -256,7 +258,6 @@ bchoc remove -i item_id -y reason [-o owner]
 Prevents any further action from being taken on the evidence item specified. The specified
 item must have a state of CHECKEDIN for the action to succeed.
 '''
-
 
 def remove():
 
@@ -307,7 +308,6 @@ def remove():
                 else:
                     new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, state)
 
-
                 chain.append(new_block)
 
                 return None
@@ -325,16 +325,15 @@ def remove():
 bchoc init
 Sanity check. Only starts up and checks for the initial block.
 '''
-
-
 def init():
 
-    try:
-        read_from_file()
-    except:
-        return
+    if read_from_file():
+        print('Blockchain file found with INITIAL block.')
+    else:
+        print('Blockchain file not found. Created INITIAL block.')
 
 '''
+
 bchoc verify
 Parse the blockchain and validate all entries.
 '''
@@ -342,12 +341,16 @@ def verify():
 
     print("Transactions in blockchain: " + str(len(chain)))
     isClean = True
+
+    # start at the initial block and iterate the chain. check for correct parent hash. check that contents and checksum match
     for block in chain:
-        if block.state == 'ERROR':
-            isClean = False
-            print("There is an error")
-    if isClean == True:
-        print("State of blockchain: CLEAN")
+       print(block)
+
+
+
+
+
+
     return None
 
 
@@ -378,6 +381,11 @@ def run_commands(command):
         checkin()
     elif command == 'log':
         commands.remove('log')
+
+        # ensures there is at least two commands given -i abc123
+        if len(commands) < 2: 
+            exit(1)
+
         if commands[0] == '-r' or commands[0] == '--reverse':
             reverse = True
             commands.pop(0)
@@ -417,6 +425,8 @@ def save_to_file():
 
 
 # reads and restores the saved blocks from file, and add to list 'chain'
+# returns True if blockchain file was previous created
+# returns False if no blockchain file was found
 def read_from_file():
     l = []
     count = 0
@@ -425,7 +435,6 @@ def read_from_file():
 
     try:
         with open(file_path, 'r') as filehandle:
-            print('Blockchain file found with INITIAL block.')
 
             for line in filehandle:
                 # remove linebreak which is the last character of the string
@@ -441,12 +450,21 @@ def read_from_file():
                     chain.append(b)
                     l = []
                     count = 0
+        
+        return True
+
     except:
-        print('Blockchain file not found. Created INITIAL block.')
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
         chain.append(b)
         save_to_file()
+
+        return False
+
+
+
+
+
 
 # initial call from command line
 # ensures enough args given
