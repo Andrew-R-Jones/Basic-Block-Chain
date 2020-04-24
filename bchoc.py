@@ -480,6 +480,17 @@ def save_to_file():
 # returns True if blockchain file was previous created
 # returns False if no blockchain file was found
 def read_from_file():
+    #get the chain from block
+    chain = block.make_chain()
+    if len(chain) == 0:
+        block.pack_block(0,0) #initial block paramters
+        chain = block.make_chain() #chain now holds init block might not need it
+        return False
+    else:
+        return True
+"""
+old code
+def read_from_file():
     l = []
     count = 0
     # define an empty list
@@ -512,11 +523,7 @@ def read_from_file():
         save_to_file()
 
         return False
-
-
-
-
-
+        """
 
 # initial call from command line
 # ensures enough args given
