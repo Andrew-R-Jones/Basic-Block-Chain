@@ -1,15 +1,23 @@
-import sys
-import struct
-import hashlib
-from collections import namedtuple
-from shlex import split
-from sys import byteorder
-from uuid import UUID, uuid4
-import datetime
-from datetime import datetime, timedelta, timezone
-
-##trying to pack and upack the intial block and compare against test003
 # *-* coding: utf-8 *-*
+
+import random
+import re
+import struct
+import subprocess
+import unittest
+from collections import namedtuple
+from copy import deepcopy as copy
+from datetime import datetime, timedelta, timezone
+from hashlib import sha1
+from pathlib import Path
+from shlex import split
+from subprocess import PIPE, CalledProcessError
+from sys import byteorder
+from tempfile import TemporaryDirectory
+from typing import BinaryIO, List, Callable
+from uuid import UUID, uuid4
+
+random.seed()
 
 Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
 
@@ -27,22 +35,10 @@ STATE = {
     "DESTROYED": b"DESTROYED\0\0",
     "RELEASED": b"RELEASED\0\0\0",
 }
-"""
 INITIAL = Block(
     prev_hash=0,  # 20 bytes
     timestamp=0,  # 08 bytes
     case_id=UUID(int=0),  # 16 bytes
-    evidence_id=0,  # 04 bytes
-    state=STATE["init"],  # 11 bytes
-    d_length=14,  # 04 bytes
-    data=b"Initial block\0",
-)"""
-
-#timestamp=datetime.datetime.timestamp(datetime.datetime.now()) 
-INITIAL = Block(
-    prev_hash=bytes("0","utf-8"),  # 20 bytes
-    timestamp=datetime.timestamp(datetime.now()),  # 08 bytes
-    case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
     evidence_id=0,  # 04 bytes
     state=STATE["init"],  # 11 bytes
     d_length=14,  # 04 bytes
@@ -65,6 +61,10 @@ print("printing block")
 print(block)
 print("printing contents")
 print(blockContents)
+print("printing timestamp")
+print(timestamp)
+
+
 fp.close()
 
 
@@ -81,24 +81,3 @@ block_bytes = block_head_struct.pack(
     len(data),
 )
 """
-#packing with intial data
-test_pack = block_head_struct.pack(INITIAL[0],INITIAL[1],INITIAL[2],INITIAL[3],INITIAL[4],INITIAL[5])
-print("test_pack")
-print(test_pack)
-fp = open("./test004", 'wb')
-fp.write(test_pack)
-fp.close()
-
-#unpack and compare
-fp = open('./test004','rb')
-
-#======================================================================
-# Unpacking the block structure
-#======================================================================
-block = fp.read(68)
-blockContents = block_head_struct.unpack(block)
-timestamp = datetime.fromtimestamp(blockContents[1])
-print("printing block")
-print(block)
-print("printing block contents")
-print(blockContents)
