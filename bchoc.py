@@ -99,6 +99,9 @@ of a newly added item is CHECKEDIN. The given evidence ID must be unique
 
 def add():
 
+    add_output_string = ""
+
+
     if commands[0] == '-c':
         case_id = commands[1]
         commands.pop(0)
@@ -108,24 +111,29 @@ def add():
 
     if len(commands) < 2:
         exit(1)
+    # check the length for item -i and item id string
+    if commands[0] != '-i' or not commands[1]:
+        print('no item id')
+        exit(1)
 
+    add_output_string += "Case: " + case_id
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
 
         if add_to_block_chain(case_id, item_id):
 
-            print("Case: " + case_id)
-            print("Added item: " + item_id)
+            #print("Case: " + case_id)
+            add_output_string += "\nAdded item: " + item_id
             for block in chain:
                 if block.evidence_item_id == item_id:
-                    print(" Status: " + block.state)
-                    print(" Time of action: " + block.time_stamp)
+                   add_output_string += "\n  Status: " + block.state
+                   add_output_string += "\n  Time of action: " + block.time_stamp
         # exits with error if the item id was already added to the blockchain
         else:
-            print('no item id')
             exit(1)
 
+    print(add_output_string)
     save_to_file()
 
     return None
@@ -295,7 +303,7 @@ def remove():
                 print("Removed item: " + b.evidence_item_id)
                 print("  Status: " + state)
                 if released:
-                    print("  Owner info: " + state)
+                    print("  Owner info: " + new_block_data)
                 print("  Time of action: " + b.time_stamp)
 
                 previous_hash = get_last_block_hash()
@@ -332,27 +340,47 @@ def init():
     else:
         print('Blockchain file not found. Created INITIAL block.')
 
-'''
 
+
+def verify_parent_hashes():
+
+    error_found = False
+    real_previous_hash = hashlib.sha1(repr(chain[0]).encode('utf-8')).hexdigest()
+
+    for block in chain[1:]:
+
+        if block.previous_hash != real_previous_hash:
+            print('State of blockchain: ERROR')
+            print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
+            print('Parent block: NOT FOUND')
+            return True
+        else:
+            real_previous_hash = hashlib.sha1(repr(block).encode('utf-8')).hexdigest()
+
+
+    return False
+
+
+
+
+
+'''
 bchoc verify
 Parse the blockchain and validate all entries.
 '''
 def verify():
 
+    error = False
+
     print("Transactions in blockchain: " + str(len(chain)))
-    isClean = True
+    # check for correct parent hashes. 
+    error = verify_parent_hashes()
 
-    # start at the initial block and iterate the chain. check for correct parent hash. check that contents and checksum match
-    for block in chain:
-       print(block)
-
+    # check that contents and checksum match
 
 
 
-
-
-    return None
-
+    if not error: print('State of blockchain: CLEAN')
 
 ''' runs certain function based on the command argument passed in '''
 
