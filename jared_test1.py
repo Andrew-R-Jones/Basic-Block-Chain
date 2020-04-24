@@ -27,18 +27,6 @@ STATE = {
     "DESTROYED": b"DESTROYED\0\0",
     "RELEASED": b"RELEASED\0\0\0",
 }
-"""
-INITIAL = Block(
-    prev_hash=0,  # 20 bytes
-    timestamp=0,  # 08 bytes
-    case_id=UUID(int=0),  # 16 bytes
-    evidence_id=0,  # 04 bytes
-    state=STATE["init"],  # 11 bytes
-    d_length=14,  # 04 bytes
-    data=b"Initial block\0",
-)"""
-
-#timestamp=datetime.datetime.timestamp(datetime.datetime.now()) 
 INITIAL = Block(
     prev_hash=bytes("0","utf-8"),  # 20 bytes
     timestamp=datetime.timestamp(datetime.now()),  # 08 bytes
@@ -49,7 +37,8 @@ INITIAL = Block(
     data=b"Initial block\0",
 )
 
-block_head_fmt = "20s d 16s I 11s I"
+block_head_fmt = "20sxxxx d 16s I 11sx I"
+#block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
 
@@ -61,9 +50,9 @@ fp = open('./test003','rb')
 block = fp.read(68)
 blockContents = block_head_struct.unpack(block)
 timestamp = datetime.fromtimestamp(blockContents[1])
-print("printing block")
+print("printing 003 block")
 print(block)
-print("printing contents")
+print("printing 003 contents")
 print(blockContents)
 fp.close()
 
@@ -83,8 +72,6 @@ block_bytes = block_head_struct.pack(
 """
 #packing with intial data
 test_pack = block_head_struct.pack(INITIAL[0],INITIAL[1],INITIAL[2],INITIAL[3],INITIAL[4],INITIAL[5])
-print("test_pack")
-print(test_pack)
 fp = open("./test004", 'wb')
 fp.write(test_pack)
 fp.close()
@@ -98,7 +85,7 @@ fp = open('./test004','rb')
 block = fp.read(68)
 blockContents = block_head_struct.unpack(block)
 timestamp = datetime.fromtimestamp(blockContents[1])
-print("printing block")
+print("printing 004 block")
 print(block)
-print("printing block contents")
+print("printing 004 block contents")
 print(blockContents)

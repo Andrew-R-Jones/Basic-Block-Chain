@@ -128,3 +128,6 @@ print(evidence_unpack)
 #print(t)
 #timestamp = datetime.datetime.fromtimestamp(blockContents[1])
 #print(timestamp)
+
+#doing padding
+test_pack = struct.pack("i0h", 5)
