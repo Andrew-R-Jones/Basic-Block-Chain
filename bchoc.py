@@ -24,25 +24,6 @@ file_path = 'blockchain.txt'
 # global list that will hold all blocks and will create the chain
 chain = []
 
-STATE = {
-    "init": b"INITIAL\0\0\0\0",
-    "in": b"CHECKEDIN\0\0",
-    "out": b"CHECKEDOUT\0",
-    "dis": b"DISPOSED\0\0\0",
-    "des": b"DESTROYED\0\0",
-    "rel": b"RELEASED\0\0\0",
-    "INITIAL": b"INITIAL\0\0\0\0",
-    "CHECKEDIN": b"CHECKEDIN\0\0",
-    "CHECKEDOUT": b"CHECKEDOUT\0",
-    "DISPOSED": b"DISPOSED\0\0\0",
-    "DESTROYED": b"DESTROYED\0\0",
-    "RELEASED": b"RELEASED\0\0\0",
-}
-
-block_head_fmt = "20s d 16s I 11s I"
-block_head_len = struct.calcsize(block_head_fmt)
-block_head_struct = struct.Struct(block_head_fmt)
-
 
 # returns true if the item was found in the block chain. false, if it was not found
 # return exit code 1 if the block was found in the chain with a released state
