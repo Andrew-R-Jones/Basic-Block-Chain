@@ -361,6 +361,27 @@ def verify_parent_hashes():
     return False
 
 
+def check_duplicate_parents():
+
+    parent_list = []
+
+
+    for block in chain:
+
+        parent_hash = block.previous_hash
+            
+        # checks for duplicate of parent hash
+        if parent_hash in parent_list: 
+            print('State of blockchain: ERROR')
+            print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
+            print(f"Parent block: {block.previous_hash}")
+            print('Two blocks found with same parent.')
+            return True
+        # otherwise add the hash to the list
+        else:
+            parent_list.append(parent_hash)
+
+    return False
 
 
 
@@ -374,13 +395,13 @@ def verify():
 
     print("Transactions in blockchain: " + str(len(chain)))
     # check for correct parent hashes. 
-    error = verify_parent_hashes()
+    #verify_parent_hashes()
+    check_duplicate_parents()
+
 
     # check that contents and checksum match
 
-
-
-    if not error: print('State of blockchain: CLEAN')
+    #if not error: print('State of blockchain: CLEAN')
 
 ''' runs certain function based on the command argument passed in '''
 
