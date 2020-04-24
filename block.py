@@ -136,6 +136,7 @@ def add_chain(test_pack):
 
 #not currently in use    
 def make_chain():
+    chain_new=[]
     with open(file_path, 'rb') as openfileobject:
         for block in iter(partial(openfileobject.read, 68), b''):
             blockContents = block_head_struct.unpack(block)
@@ -160,6 +161,7 @@ def make_chain():
             #new_block = Block(hash, timestamp, uuid, evidence, state,data_len,"the data")
             #chain.append(new_block)
         openfileobject.close()
+        return chain_new
     
 
 #pack_block("00000000-0000-0000-0000-000000000000", 111111111)
