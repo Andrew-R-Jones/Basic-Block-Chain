@@ -1,5 +1,5 @@
 #import maya
-import datetime
+from datetime import datetime, timedelta, timezone
 
 def get_current_time():
     return datetime.datetime.now().isoformat()
@@ -11,23 +11,25 @@ def get_data_length(data):
     return len(data.encode('utf-8')) + 1
 
 # block class
-class Block: 
+class Block:
 
     # instantiates block for blockchain
-    def __init__(self, previous_hash, case_id, evidence_item_id, state, data=None, data_length=None, time_stamp=get_current_time()):
+    def __init__(self, previous_hash, time_stamp, case_id, evidence_item_id, state, data_length, data):
         self.previous_hash = previous_hash
+        self.time_stamp = time_stamp
         self.case_id = case_id
         self.evidence_item_id = evidence_item_id
         self.state = state
-        self.data = data
         self.data_length = data_length
-        self.time_stamp = time_stamp
+        self.data = data
 
 
-    ''' similar to toString, returns info about the object'''
+
+
+    ''' similar to toString, returns info about the object
     def __repr__(self):
         return f"{self.previous_hash}\n{self.time_stamp}\n{self.case_id}\n{self.evidence_item_id}\n{self.state}\n{self.data_length}\n{self.data}"
-
+    '''
 
 
 #test data for creating new block

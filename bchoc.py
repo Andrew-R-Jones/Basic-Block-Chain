@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 
-import sys
-import block
 import hashlib
-import os
+import pickle
 import struct
+import sys
+import binascii
 
+from uuid import UUID, uuid4
+from typing import BinaryIO, List, Callable
+import block
+from block import Block
 from block import get_current_time
-
-
-
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
@@ -18,7 +19,7 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain.txt'
+file_path = 'blockchain'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -38,6 +39,16 @@ STATE = {
     "DESTROYED": b"DESTROYED\0\0",
     "RELEASED": b"RELEASED\0\0\0",
 }
+
+INITIAL = Block(
+    previous_hash=0,
+    time_stamp=0,
+    case_id=UUID(int=0),
+    evidence_item_id=0,
+    state=STATE["init"],
+    data_length=14,
+    data=b"Initial block\0"
+)
 
 block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
@@ -411,9 +422,18 @@ def run_commands(command):
 
 def save_to_file():
 
-    with open(file_path, 'w') as filehandle:
+    with open(file_path, 'wb') as filehandle:
         for block in chain:
-            filehandle.write('%s\n' % block)
+            block_bytes = block_head_struct.pack(
+                bytes(block.previous_hash),
+                block.time_stamp,
+                block.case_id.int.to_bytes(16, byteorder="little"),
+                block.evidence_item_id,
+                block.state,
+                len(block.data)
+            )
+            print(block_bytes)
+            filehandle.write(block_bytes)
 
 
 # reads and restores the saved blocks from file, and add to list 'chain'
@@ -426,7 +446,7 @@ def read_from_file():
     try:
         with open(file_path, 'r') as filehandle:
             print('Blockchain file found with INITIAL block.')
-
+            '''
             for line in filehandle:
                 # remove linebreak which is the last character of the string
                 item = line[:-1]
@@ -437,14 +457,15 @@ def read_from_file():
 
                 if count == 7:
                     #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                    b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
-                    chain.append(b)
+                    #b = block.Block(l[0], time_stamp=l[1], l[2],  l[3],  l[4], l[6], l[5])
+                    #chain.append(b)
                     l = []
                     count = 0
+            '''
     except:
         print('Blockchain file not found. Created INITIAL block.')
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
+        b = INITIAL
         chain.append(b)
         save_to_file()
 
