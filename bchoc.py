@@ -15,12 +15,12 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
+#file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
+file_path = 'blockchain'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -54,7 +54,6 @@ INITIAL = Block(
 block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
-
 
 # returns true if the item was found in the block chain. false, if it was not found
 # return exit code 1 if the block was found in the chain with a released state
@@ -431,9 +430,17 @@ def save_to_file():
                 block.case_id.int.to_bytes(16, byteorder="little"),
                 block.evidence_item_id,
                 block.state,
-                len(block.data)
+                block.data_length
             )
             filehandle.write(block_bytes)
+            data_head_fmt = str(len(block.data)) + "s"
+            data_head_len = struct.calcsize(data_head_fmt)
+            data_head_struct = struct.Struct(data_head_fmt)
+            data_bytes = data_head_struct.pack(
+                block.data
+            )
+            filehandle.write(data_bytes)
+
 
 
 # reads and restores the saved blocks from file, and add to list 'chain'
