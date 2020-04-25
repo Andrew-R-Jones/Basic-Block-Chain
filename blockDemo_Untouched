@@ -1,15 +1,23 @@
-import sys
-import struct
-import hashlib
-from collections import namedtuple
-from shlex import split
-from sys import byteorder
-from uuid import UUID, uuid4
-import datetime
-from datetime import datetime, timedelta, timezone
-
-##trying to pack and upack the intial block and compare against test003
 # *-* coding: utf-8 *-*
+
+import random
+import re
+import struct
+import subprocess
+import unittest
+from collections import namedtuple
+from copy import deepcopy as copy
+from datetime import datetime, timedelta, timezone
+from hashlib import sha1
+from pathlib import Path
+from shlex import split
+from subprocess import PIPE, CalledProcessError
+from sys import byteorder
+from tempfile import TemporaryDirectory
+from typing import BinaryIO, List, Callable
+from uuid import UUID, uuid4
+
+random.seed()
 
 Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
 
@@ -28,21 +36,20 @@ STATE = {
     "RELEASED": b"RELEASED\0\0\0",
 }
 INITIAL = Block(
-    prev_hash=bytes("0","utf-8"),  # 20 bytes
-    timestamp=datetime.timestamp(datetime.now()),  # 08 bytes
-    case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
+    prev_hash=0,  # 20 bytes
+    timestamp=0,  # 08 bytes
+    case_id=UUID(int=0),  # 16 bytes
     evidence_id=0,  # 04 bytes
     state=STATE["init"],  # 11 bytes
     d_length=14,  # 04 bytes
     data=b"Initial block\0",
 )
 
-block_head_fmt = "20sxxxx d 16s I 11sx I"
-#block_head_fmt = "20s d 16s I 11s I"
+block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
 
-fp = open('./test003','rb')
+# fp = open('./test003','rb')
 
 #======================================================================
 # Unpacking the block structure
@@ -50,17 +57,17 @@ fp = open('./test003','rb')
 block = fp.read(68)
 blockContents = block_head_struct.unpack(block)
 timestamp = datetime.fromtimestamp(blockContents[1])
-print("printing 003 block")
-print(block)
-print("printing 003 contents")
-print(blockContents)
-fp.close()
+
+# print(timestamp)
+# print(blockContents)
+
+# fp.close()
 
 
 #======================================================================
 # packing the structure
 #======================================================================
-"""
+
 block_bytes = block_head_struct.pack(
     prev_hash,
     block.timestamp,
@@ -69,23 +76,3 @@ block_bytes = block_head_struct.pack(
     state,
     len(data),
 )
-"""
-#packing with intial data
-test_pack = block_head_struct.pack(INITIAL[0],INITIAL[1],INITIAL[2],INITIAL[3],INITIAL[4],INITIAL[5])
-fp = open("./test004", 'wb')
-fp.write(test_pack)
-fp.close()
-
-#unpack and compare
-fp = open('./test004','rb')
-
-#======================================================================
-# Unpacking the block structure
-#======================================================================
-block = fp.read(68)
-blockContents = block_head_struct.unpack(block)
-timestamp = datetime.fromtimestamp(blockContents[1])
-print("printing 004 block")
-print(block)
-print("printing 004 block contents")
-print(blockContents)

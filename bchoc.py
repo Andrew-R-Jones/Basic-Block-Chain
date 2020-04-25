@@ -16,14 +16,11 @@ from datetime import datetime, timedelta, timezone
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
 file_path = os.environ["BCHOC_FILE_PATH"]
-########################################################################################
-
-########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
 #file_path = 'blockchain'
+########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
-########################################################################################
 
 
 chain = [] # global list that will hold all blocks and will create the chain
@@ -239,8 +236,6 @@ def log(reverse, num_entries, item_id):
             print("")
             if count == num_entries:
                 return
-
-
     return None
 
 
@@ -493,7 +488,7 @@ def read_from_file():
     #get the chain from block
     chain = make_chain()
     if len(chain) == 0:
-        block.pack_block(0,0,"init",datetime.timestamp(datetime.now())) #initial block paramters
+        block.pack_block(0,0,"init",0) #initial block paramters
         chain = make_chain() #chain now holds init block might not need it
         return False
     else:

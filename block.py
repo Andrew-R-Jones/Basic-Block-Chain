@@ -12,6 +12,13 @@ from datetime import datetime, timedelta, timezone
 from functools import partial
 import os
 
+########################################################################################
+###############     FOR SUBMISSION      ################################################
+file_path = os.environ["BCHOC_FILE_PATH"]
+###############     FOR DUBUG AND TESTING       ########################################
+#file_path = 'blockchain'
+########################################################################################
+
 def get_current_time():
     return datetime.now().isoformat()
     #return (maya.now()).iso8601()
@@ -39,15 +46,7 @@ class Block:
     def __repr__(self):
         return f"{self.previous_hash}\n{self.time_stamp}\n{self.case_id}\n{self.evidence_item_id}\n{self.state}\n{self.data_length}\n{self.data}"
 
-########################################################################################
-###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
-########################################################################################
 
-########################################################################################
-###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
-########################################################################################
 chain = []
 chain_new = []
 
@@ -77,19 +76,23 @@ block_head_struct = struct.Struct(block_head_fmt)
 # state bytes, data length no change 
 INITIAL = Block_tuple(
     prev_hash=bytes("0","utf-8"),  # 20 bytes
-    timestamp=datetime.timestamp(datetime.now()),  # 08 bytes
+    timestamp=0,  # 08 bytes
     case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
     evidence_id=0,  # 04 bytes
     state=STATE["init"],  # 11 bytes
     d_length=14,  # 04 bytes
-    data=b"Initial block\0",
+    data=b"Initial block\x00",
 )
 
 #pack, write to file, calls add_chain
 def pack_block(case,item,state,timestamp):
+    #Oh, OK, I printed out the file sizes and the valid block file is of size 82 while mine is of size 68?
+
+    
     #check if initial block set hash to zero
     if(len(chain) == 0):
-        prev_hash = bytes("0","utf-8")
+        prev_hash = "0"
+        prev_hash= prev_hash.encode()
     else:
         last_block = chain[-1]
         prev_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest()
@@ -102,12 +105,12 @@ def pack_block(case,item,state,timestamp):
     evidence=item
     state = STATE[state]
     d_length=14  # 04 bytes
-    data=b"Initial block\0"
+    data=b"Initial block\x00"
     test_pack = block_head_struct.pack(prev_hash,timestamp,case_id,evidence,state,d_length)
     fp = open(file_path, 'ab')
     fp.write(test_pack)
     fp.close()
-    add_chain(test_pack)
+    #add_chain(test_pack)
 
 #prints the chain[]
 def print_chain():
@@ -141,8 +144,9 @@ def make_chain():
         for block in iter(partial(openfileobject.read, 68), b''):
             blockContents = block_head_struct.unpack(block)
             hash = blockContents[0]
-            from binascii import hexlify
-            hash= hexlify(hash).decode('ascii')
+            hash = hash.decode("utf-8")
+            #from binascii import hexlify
+            #hash= hexlify(hash).decode('ascii')
             #timestamp = datetime.fromtimestamp(blockContents[1])
             #uuid = UUID(bytes=blockContents[2])
             #evidence = blockContents[3]
