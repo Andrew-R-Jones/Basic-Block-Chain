@@ -418,8 +418,6 @@ def run_commands(command):
     save_to_file()
 
 # saves the list of blocks to a file
-
-
 def save_to_file():
 
     with open(file_path, 'wb') as filehandle:
@@ -445,6 +443,7 @@ def save_to_file():
 
 # reads and restores the saved blocks from file, and add to list 'chain'
 def read_from_file():
+
     l = []
     count = 0
     # define an empty list
@@ -452,29 +451,32 @@ def read_from_file():
 
     try:
         with open(file_path, 'rb') as filehandle:
-
+            #unpack first 68 bytes of the block ando store in local vars
             file_block = filehandle.read(block_head_len)
             blockContents = block_head_struct.unpack(file_block)
             previousHash = blockContents[0].decode()
+            print(previousHash)
             timeStamp = datetime.fromtimestamp(blockContents[1])
+            print(timeStamp)
             caseID = UUID(int =(int.from_bytes(blockContents[2], byteorder="little")))
+            print(caseID)
             evidenceID = blockContents[3]
+            print(evidenceID)
             blockState = blockContents[4].decode()
-            dataLength = blockContents[5]
+            print(STATE["INITIAL"])
 
-            if blockState == "INITIAL":
-                dataStr = b"Initial block\0"
-            '''
-            b = Block(
-                previous_hash=previousHash,
-                time_stamp=timeStamp,
-                case_id=caseID,
-                evidence_item_id=evidenceID,
-                state=STATE[blockState],
-                data_length=dataLength,
-                data = dataStr
-            )
-            '''
+            dataLength = blockContents[5]
+            #define struct for unpacking data
+            data_head_fmt = str(dataLength) + "s"
+            data_head_len = struct.calcsize(data_head_fmt)
+            data_head_struct = struct.Struct(data_head_fmt)
+            #unpack and store data block
+            data_block = filehandle.read(data_head_len)
+            dataContents = data_head_struct.unpack(data_block)
+            dataBlock = dataContents[0]
+
+            b = Block(previousHash, timeStamp, caseID, evidenceID, STATE[blockState],
+                dataLength, datablock)
 
             '''
             for line in filehandle:
