@@ -14,9 +14,9 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
+#file_path = os.environ["BCHOC_FILE_PATH"]
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
+file_path = 'blockchain'
 ########################################################################################
 
 def get_current_time():
@@ -75,7 +75,7 @@ block_head_struct = struct.Struct(block_head_fmt)
 #making hash into bytes, timestamp to double, casid to bytes, evidence no change
 # state bytes, data length no change 
 INITIAL = Block_tuple(
-    prev_hash=bytes("0","utf-8"),  # 20 bytes
+    prev_hash=bytes("","utf-8"),  # 20 bytes
     timestamp=0,  # 08 bytes
     case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
     evidence_id=0,  # 04 bytes
@@ -91,7 +91,7 @@ def pack_block(case,item,state,timestamp):
     
     #check if initial block set hash to zero
     if(len(chain) == 0):
-        prev_hash = "0"
+        prev_hash = ""
         prev_hash= prev_hash.encode()
     else:
         last_block = chain[-1]
@@ -104,9 +104,9 @@ def pack_block(case,item,state,timestamp):
     case_id = UUID(case).bytes 
     evidence=item
     state = STATE[state]
-    d_length=14  # 04 bytes
+    #d_length=14  # 04 bytes
     data=b"Initial block\x00"
-    test_pack = block_head_struct.pack(prev_hash,timestamp,case_id,evidence,state,d_length)
+    test_pack = block_head_struct.pack(prev_hash,timestamp,case_id,evidence,state,len(data))  
     fp = open(file_path, 'ab')
     fp.write(test_pack)
     fp.close()

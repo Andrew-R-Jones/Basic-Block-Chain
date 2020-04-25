@@ -79,12 +79,13 @@ block = Block(
 #block.case_id.int.to_bytes(16, byteorder="little"), #or "big"
 block_bytes = block_head_struct.pack(
     b"",
-    block.timestamp,
+    0,
     bytes("0", "utf-8"),
     block.evidence_id,
     block.state,
     len(block.data),
 )
 ##upack it
+print("contensts NEW!!!!!")
 blockContents_new = block_head_struct.unpack(block_bytes)
 print(blockContents_new)
