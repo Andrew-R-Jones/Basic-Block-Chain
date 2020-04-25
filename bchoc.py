@@ -15,14 +15,14 @@ from datetime import datetime, timedelta, timezone
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
+#file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
-#if (path.exists(file_path) == False): #check if there is a file yet
-#    open(file_path, 'w').close() #create the file
+file_path = 'blockchain'
+if (path.exists(file_path) == False): #check if there is a file yet
+    open(file_path, 'w').close() #create the file
 ########################################################################################
 
 
@@ -325,13 +325,13 @@ def init():
 
 
 def verify_parent_hashes():
-
+    chain = make_chain()
     error_found = False
     real_previous_hash = hashlib.sha1(repr(chain[0]).encode('utf-8')).hexdigest()
 
     for block in chain[1:]:
 
-        if block.previous_hash != real_previous_hash:
+        if block.prev_hash != real_previous_hash:
             print('State of blockchain: ERROR')
             print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
             print('Parent block: NOT FOUND')
@@ -345,18 +345,19 @@ def verify_parent_hashes():
 
 def check_duplicate_parents():
 
+    chain = make_chain()
     parent_list = []
 
 
     for block in chain:
 
-        parent_hash = block.previous_hash
+        parent_hash = block.prev_hash
             
         # checks for duplicate of parent hash
         if parent_hash in parent_list: 
             print('State of blockchain: ERROR')
             print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
-            print(f"Parent block: {block.previous_hash}")
+            print(f"Parent block: {block.prev_hash}")
             print('Two blocks found with same parent.')
             return True
         # otherwise add the hash to the list
