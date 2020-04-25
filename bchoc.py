@@ -14,12 +14,12 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
+#file_path = 'blockchain'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -447,17 +447,27 @@ def read_from_file():
 
             file_block = filehandle.read(block_head_len)
             blockContents = block_head_struct.unpack(file_block)
-            previousHash = blockContents[0]
+            previousHash = blockContents[0].decode()
+            timeStamp = datetime.fromtimestamp(blockContents[1])
+            caseID = UUID(int =(int.from_bytes(blockContents[2], byteorder="little")))
+            evidenceID = blockContents[3]
+            blockState = blockContents[4].decode()
+            dataLength = blockContents[5]
+
+            if blockState == "INITIAL":
+                dataStr = b"Initial block\0"
             '''
             b = Block(
-                previous_hash=prevHash,
+                previous_hash=previousHash,
                 time_stamp=timeStamp,
                 case_id=caseID,
                 evidence_item_id=evidenceID,
-                state=blockState,
-                data_length=dataLength
+                state=STATE[blockState],
+                data_length=dataLength,
+                data = dataStr
             )
             '''
+
             '''
             for line in filehandle:
                 # remove linebreak which is the last character of the string
