@@ -32,15 +32,14 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
+#file_path = 'blockchain'
 ########################################################################################
 
 def get_current_time():
     return datetime.now().isoformat()
     #return (maya.now()).iso8601()
-
 
 def get_data_length(data):
     # add 1 for null char
@@ -48,9 +47,8 @@ def get_data_length(data):
 
 # block class
 class Block: 
-
     # instantiates block for blockchain
-    def __init__(self, previous_hash, case_id, evidence_item_id, state, data=None, data_length=None, time_stamp=get_current_time()):
+    def __init__ (self, previous_hash, case_id, evidence_item_id, state, data, data_length, time_stamp):
         self.previous_hash = previous_hash
         self.case_id = case_id
         self.evidence_item_id = evidence_item_id
@@ -58,7 +56,6 @@ class Block:
         self.data = data
         self.data_length = data_length
         self.time_stamp = time_stamp
-
 
     ''' similar to toString, returns info about the object'''
     def __repr__(self):
@@ -69,7 +66,7 @@ chain = []
 chain_new = []
 
 #Block_tuple = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
-Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
+#Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
 STATE = {
     "init": b"INITIAL\0\0\0\0",
     "in": b"CHECKEDIN\0\0",
@@ -91,52 +88,64 @@ block_head_struct = struct.Struct(block_head_fmt)
 
 #making hash into bytes, timestamp to double, casid to bytes, evidence no change
 # state bytes, data length no change 
-INITIAL = Block(
-    prev_hash=bytes("","utf-8"),  # 20 bytes
-    timestamp=0,  # 08 bytes
-    case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
-    evidence_id=0,  # 04 bytes
-    state=STATE["init"],  # 11 bytes
-    d_length=14,  # 04 bytes
-    data=b"Initial block\x00",
-)
+
 
 #pack, write to file, calls add_chain
 def pack_block(case,item,state,timestamp):
     #======================================================================
     # packing the structure
     #======================================================================
-    #we have an initial block that I hard code and then the reg_block 
-    reg_block = Block(
-    prev_hash=bytes("0", "utf-8"),  # 20 bytes
-    timestamp=0,  # 08 bytes
-    case_id=UUID(int=0),  # 16 bytes
-    evidence_id=0,  # 04 bytes
-    state=STATE["init"],  # 11 bytes
-    d_length=14,  # 04 bytes
-    data=b"Initial block\0",
-)
-    #check if initial block set hash to zero
-    if(len(chain) == 0):
-        block_bytes = block_head_struct.pack(
-        b"",
-        0,
-        bytes("0", "utf-8"),
-        0,
-        b"INITIAL\0\0\0\0",
-        14,
-        )
+    #we have an initial block that I hard code and then the reg_block
+    b=Block(1,2,3,4,5,6,7)
+    if(state == "init"):
+        data=b"Initial block\0"
+        bock_pack = block_head_struct.pack(b"",0,bytes("0", "utf-8"),0,b"INITIAL\0\0\0\0",14,)
+        data_pack = struct.pack("14s",data)
+        fp = open(file_path, 'ab')
+        fp.write(bock_pack)
+        fp.write(data_pack)
+        fp.close()
     else:
-        block_bytes = block_head_struct.pack(
-        reg_block.prev_hash,
-        reg_block.timestamp,
-        reg_block.case_id,
-        reg_block.state,
-        len(reg_block.data))
-    #write to file
-    fp = open(file_path, 'ab')
-    fp.write(block_bytes)
-    fp.close()
+        chain = make_chain()
+        last_block = chain[-1]
+        b.previous_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest()
+        b.time_stamp=timestamp
+        b.case_id=UUID(case).int.to_bytes(16, byteorder="little")  # 16 bytes
+        b.evidence_id=item
+        b.state = STATE[state]
+        b.data = "testing"
+        b.data_length = len("testing")
+        """
+        reg_block = Block(
+        prev_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest(),  # 20 bytes
+        timestamp=timestamp,  # 08 bytes
+        case_id=UUID(case).int.to_bytes(16, byteorder="little"),  # 16 bytes
+        evidence_id=0,  # 04 bytes
+        state=STATE[state],  # 11 bytes
+        data=b"Initial block\x00",
+        d_length=len(data),  # 04 bytes
+        )
+        """
+        #print(b.previous_hash)
+        #print(b.time_stamp)
+        #print(b.case_id)
+        #print(b.evidence_item_id)
+        #print(b.state)
+        #print(b.data_length)
+        block_pack = block_head_struct.pack(
+        b.previous_hash,
+        b.time_stamp,
+        b.case_id,
+        b.evidence_item_id,
+        b.state,
+        b.data_length)
+
+        data_pack = struct.pack("%ds" %(b.data_length),bytes(b.data, "utf-8"))
+        #write to file
+        fp = open(file_path, 'ab')
+        fp.write(block_pack)
+        fp.write(data_pack)
+        fp.close()
     """
     #check if initial block set hash to zero
     if(len(chain) == 0):
@@ -160,16 +169,6 @@ def pack_block(case,item,state,timestamp):
     fp.write(test_pack)
     fp.close()
     """
-#prints the chain[]
-def print_chain():
-    print("printing chain")
-    for block in chain_new:
-        print(block.prev_hash)
-        print(block.timestamp)
-        print(block.case_id)
-        print(block.evidence_id)
-        print(block.state)
-        print(block.data)
 
 #adds a block to the chain[]
 def add_chain(test_pack):
@@ -185,14 +184,16 @@ def add_chain(test_pack):
     new_block = Block(hash, timestamp, uuid, evidence, state,data_len,"the data")
     chain.append(new_block)
 
-#not currently in use    
+#makes the chain   
 def make_chain():
     chain_new=[]
     with open(file_path, 'rb') as openfileobject:
         for block in iter(partial(openfileobject.read, 68), b''):
             blockContents = block_head_struct.unpack(block)
             hash = blockContents[0]
-            hash = hash.decode("utf-8")
+            from binascii import hexlify
+            hash= hexlify(hash).decode('ascii')
+            #hash = hash.decode("utf-8")
             #from binascii import hexlify
             #hash= hexlify(hash).decode('ascii')
             #timestamp = datetime.fromtimestamp(blockContents[1])
@@ -200,15 +201,17 @@ def make_chain():
             #evidence = blockContents[3]
             #state = blockContents[4].decode('utf-8')
             #data_len = blockContents[5]
-            new_block = Block(
-                prev_hash=hash,  # 20 bytes
-                timestamp= datetime.fromtimestamp(blockContents[1]),  # 08 bytes
-                case_id=UUID(bytes=blockContents[2]),  # 16 bytes
-                evidence_id=blockContents[3],  # 04 bytes
-                state=blockContents[4].decode('utf-8'),  # 11 bytes
-                d_length=blockContents[5],  # 04 bytes                
-                data=b"Initial block\0",
-            )
+            new_block = Block(1,2,3,4,5,6,7)
+            new_block.previous_hash=hash  # 20 bytes
+            new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
+            new_block.case_id=UUID(bytes=blockContents[2])  # 16 bytes
+            new_block.evidence_item_id=blockContents[3]  # 04 bytes
+            new_block.state=blockContents[4].decode('utf-8')  # 11 bytes
+            new_block.data_length=blockContents[5]  # 04 bytes                
+            new_block.data = ""
+            d_raw = openfileobject.read(new_block.data_length)
+            x = struct.unpack("%ds" % (new_block.data_length), d_raw)
+            new_block.data = x[0]
             chain_new.append(new_block)
             #new_block = Block(hash, timestamp, uuid, evidence, state,data_len,"the data")
             #chain.append(new_block)

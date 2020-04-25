@@ -12,12 +12,11 @@ from block import make_chain
 import datetime
 from datetime import datetime, timedelta, timezone
 
-
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
+#file_path = 'blockchain'
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
@@ -32,7 +31,7 @@ def in_chain(item_id):
     found = False
     previously_removed = False
     for block in chain:
-        if item_id == block.evidence_id:
+        if item_id == block.evidence_item_id:
             found = True
             if block.state == 'RELEASED' or block.state == 'DISPOSED' or block.state == 'DESTROYED':
                 previously_removed = True
@@ -133,8 +132,8 @@ def checkout():
         chain = make_chain()
         reverse_chain = chain[::-1]
         for b in reverse_chain:
-            print(b.evidence_id)
-            if int(item_id) == b.evidence_id:
+            print(b.evidence_item_id)
+            if int(item_id) == b.evidence_item_id:
                 state_val = b.state.strip(' \t\r\n\0') #strip padding
                 if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
                     previous_hash = get_last_block_hash()
@@ -326,7 +325,7 @@ def verify_parent_hashes():
 
     for block in chain[1:]:
 
-        if block.prev_hash != real_previous_hash:
+        if block.previous_hash != real_previous_hash:
             print('State of blockchain: ERROR')
             print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
             print('Parent block: NOT FOUND')
@@ -346,19 +345,18 @@ def check_duplicate_parents():
 
     for block in chain:
 
-        parent_hash = block.prev_hash
+        parent_hash = block.previous_hash
             
         # checks for duplicate of parent hash
         if parent_hash in parent_list: 
             print('State of blockchain: ERROR')
             print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
-            print(f"Parent block: {block.prev_hash}")
+            print(f"Parent block: {block.previous_hash}")
             print('Two blocks found with same parent.')
             return True
         # otherwise add the hash to the list
         else:
             parent_list.append(parent_hash)
-
     return False
 
 
@@ -560,5 +558,3 @@ run_commands(commands[0])
 
 # for testing
 #print(f"BLOCK CHAIN START\n{chain}")
-
-

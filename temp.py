@@ -3,11 +3,26 @@ import hashlib
 from functools import partial
 
 #hash, time, caseid, evidence, state, length, data
-block_head_fmt = "20sxxxx d 16s I 11sx I" #20+8+16+4+11+4=63 add padd
-#block_head_fmt = "20s d 16s I 11s I"
+block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
 
+
+def new_pack():
+    print("hello" )
+    """
+    x = struct.pack("I%ds" % (len(s)), "a", s)
+    struct.pack("20s d 16s I 11s I %ds" %(14),
+    b"",
+    0,
+    bytes("0", "utf-8"),
+    0,
+    b"INITIAL\0\0\0\0",
+    14,
+    b"Initial block\0"
+)"""
+new_pack()
+"""
 def test_pack():
     x = bytes("0", "utf-8")
     y = "0"
@@ -55,6 +70,7 @@ t2()
 
 
 
+
 #pack, write to file, calls add_chain
 def pack_block(case,item,state,timestamp):
     #check if initial block set hash to zero
@@ -80,3 +96,4 @@ def pack_block(case,item,state,timestamp):
     print(test_pack)
 #pack_block(0,0, "init", 0)
 #test_pack()
+"""

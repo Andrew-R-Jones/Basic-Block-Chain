@@ -16,10 +16,13 @@ from sys import byteorder
 from tempfile import TemporaryDirectory
 from typing import BinaryIO, List, Callable
 from uuid import UUID, uuid4
+from functools import partial
 
 random.seed()
 
 Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
+
+file_path = 'blockchain_test'
 
 STATE = {
     "init": b"INITIAL\0\0\0\0",
@@ -84,8 +87,33 @@ block_bytes = block_head_struct.pack(
     0,
     b"INITIAL\0\0\0\0",
     14,
+
 )
-##upack it
-print("contensts NEW!!!!!")
-blockContents_new1 = block_head_struct.unpack(block_bytes)
-print(blockContents_new1)
+pack_data = struct.pack("14s", block.data)
+fp = open(file_path, 'ab')
+fp.write(block_bytes)
+fp.write(pack_data)
+fp.close()
+with open(file_path, 'rb') as openfileobject:
+    block = openfileobject.read(68)
+    blockContents = block_head_struct.unpack(block)
+    leng = blockContents[5]
+    print("length:", leng)
+    data_file = openfileobject.read(leng)
+    print("Data: ", data_file)
+#upack it
+#print("contensts NEW!!!!!")
+#blockContents_new1 = block_head_struct.unpack(block_bytes)
+#print(blockContents_new1)
+print("testing")
+s = bytes("what", "utf-8")
+struct.pack("%ds" % (len(s)),s)
+t = struct.unpack("%ds" % (len(s)),s)
+print(t[0])
+print("more testing")
+b="testing"
+data_bytes = bytes(b,"utf-8")
+data_pack = struct.pack("%ds" %(7),data_bytes)
+r = struct.pack("7s", b'232')
+q = struct.unpack("7s",r)
+print(q[0])
