@@ -15,17 +15,18 @@ from datetime import datetime, timedelta, timezone
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
+#file_path = 'blockchain'
+#if (path.exists(file_path) == False): #check if there is a file yet
+#    open(file_path, 'w').close() #create the file
 ########################################################################################
 
-# global list that will hold all blocks and will create the chain
-chain = []
 
+chain = [] # global list that will hold all blocks and will create the chain
 
 # returns true if the item was found in the block chain. false, if it was not found
 # return exit code 1 if the block was found in the chain with a released state
@@ -316,8 +317,6 @@ bchoc init
 Sanity check. Only starts up and checks for the initial block.
 '''
 def init():
-    if (path.exists(file_path) == False):
-        open(file_path, 'w').close() #create the file
     if read_from_file():
         print('Blockchain file found with INITIAL block.')
     else:
@@ -486,7 +485,7 @@ def run_commands(command):
     elif command == 'verify':
         verify()
 
-    save_to_file()
+    #save_to_file()
 
 # saves the list of blocks to a file
 def read_from_file():
