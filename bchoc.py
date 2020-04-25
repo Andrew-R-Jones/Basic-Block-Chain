@@ -4,6 +4,7 @@ import hashlib
 import struct
 import sys
 import binascii
+import os
 
 from datetime import datetime, time
 from uuid import UUID, uuid4
