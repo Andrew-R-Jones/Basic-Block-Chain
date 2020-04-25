@@ -87,19 +87,21 @@ INITIAL = Block_tuple(
 )
 
 #pack, write to file, calls add_chain
-def pack_block(case,item):
+def pack_block(case,item,state,timestamp):
     #check if initial block set hash to zero
     if(len(chain) == 0):
         prev_hash = bytes("0","utf-8")
     else:
         last_block = chain[-1]
         prev_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest()
-    timestamp=datetime.timestamp(datetime.now())
+    #timestamp=datetime.timestamp(datetime.now())
     if case == 0:
         case = "00000000-0000-0000-0000-000000000000"
-    case_id = UUID(case).bytes
+    case = str(case) #change from UUID to string to do replace
+    case = case.replace('-', '') #UUID to bytes does like hyphens
+    case_id = UUID(case).bytes 
     evidence=item
-    state = STATE["in"]
+    state = STATE[state]
     d_length=14  # 04 bytes
     data=b"Initial block\0"
     test_pack = block_head_struct.pack(prev_hash,timestamp,case_id,evidence,state,d_length)

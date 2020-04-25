@@ -9,7 +9,8 @@ import os.path
 from os import path
 from block import get_current_time
 from block import make_chain
-
+import datetime
+from datetime import datetime, timedelta, timezone
 
 
 ########################################################################################
@@ -64,7 +65,7 @@ def add_to_block_chain(case_id, item_id):
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         #b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
         #chain.append(b)
-        block.pack_block(case_id,item_id)
+        block.pack_block(case_id,item_id, "in", datetime.timestamp(datetime.now()))
         return True
     else: 
         return False
@@ -134,20 +135,22 @@ def checkout():
         chain = make_chain()
         reverse_chain = chain[::-1]
         for b in reverse_chain:
+            print(b.evidence_id)
             if int(item_id) == b.evidence_id:
-                print(b.state)  #why is this not working
-                print('CHECKEDIN')
-                if b.state == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-                    
+                state_val = b.state.strip(' \t\r\n\0') #strip padding
+                if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
                     previous_hash = get_last_block_hash()
                     # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
                     #new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
                     #chain.append(new_block)
-                    block.pack_block(b.case_id, b.evidence_id)
-                    print("Case: " + new_block.case_id)
-                    print("Checked out item: " + new_block.evidence_item_id)
-                    print("  Status: " + new_block.state)
-                    print("  Time of action: " + str(new_block.time_stamp))
+
+                    timestamp=datetime.timestamp(datetime.now())
+                    block.pack_block(b.case_id, b.evidence_id, state_val, timestamp)
+                    #got to get the timestamp..... need to add state and timestamp
+                    print("Case: " + str(b.case_id))
+                    print("Checked out item: " + str(b.evidence_id))
+                    print("  Status: " + state_val)
+                    print("  Time of action: " + str(timestamp))
                     return
 
                 elif b.state == 'CHECKEDOUT':
@@ -490,7 +493,7 @@ def read_from_file():
     #get the chain from block
     chain = make_chain()
     if len(chain) == 0:
-        block.pack_block(0,0) #initial block paramters
+        block.pack_block(0,0,"init",datetime.timestamp(datetime.now())) #initial block paramters
         chain = make_chain() #chain now holds init block might not need it
         return False
     else:
