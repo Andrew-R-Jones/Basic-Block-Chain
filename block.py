@@ -1,4 +1,22 @@
-#import maya
+import random
+import re
+import struct
+import subprocess
+import unittest
+from collections import namedtuple
+from copy import deepcopy as copy
+from datetime import datetime, timedelta, timezone
+from hashlib import sha1
+from pathlib import Path
+from shlex import split
+from subprocess import PIPE, CalledProcessError
+from sys import byteorder
+from tempfile import TemporaryDirectory
+from typing import BinaryIO, List, Callable
+from uuid import UUID, uuid4
+
+random.seed()
+
 import datetime
 import sys
 import struct
@@ -50,8 +68,8 @@ class Block:
 chain = []
 chain_new = []
 
-Block_tuple = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
-
+#Block_tuple = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
+Block = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
 STATE = {
     "init": b"INITIAL\0\0\0\0",
     "in": b"CHECKEDIN\0\0",
@@ -68,13 +86,12 @@ STATE = {
 }
 
 block_head_fmt = "20s d 16s I 11s I"
-#block_head_fmt = "20s d 16s I 11s I"
 block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
 
 #making hash into bytes, timestamp to double, casid to bytes, evidence no change
 # state bytes, data length no change 
-INITIAL = Block_tuple(
+INITIAL = Block(
     prev_hash=bytes("","utf-8"),  # 20 bytes
     timestamp=0,  # 08 bytes
     case_id=UUID(int=0).int.to_bytes(16, byteorder="little"),  # 16 bytes
@@ -86,9 +103,41 @@ INITIAL = Block_tuple(
 
 #pack, write to file, calls add_chain
 def pack_block(case,item,state,timestamp):
-    #Oh, OK, I printed out the file sizes and the valid block file is of size 82 while mine is of size 68?
-
-    
+    #======================================================================
+    # packing the structure
+    #======================================================================
+    #we have an initial block that I hard code and then the reg_block 
+    reg_block = Block(
+    prev_hash=bytes("0", "utf-8"),  # 20 bytes
+    timestamp=0,  # 08 bytes
+    case_id=UUID(int=0),  # 16 bytes
+    evidence_id=0,  # 04 bytes
+    state=STATE["init"],  # 11 bytes
+    d_length=14,  # 04 bytes
+    data=b"Initial block\0",
+)
+    #check if initial block set hash to zero
+    if(len(chain) == 0):
+        block_bytes = block_head_struct.pack(
+        b"",
+        0,
+        bytes("0", "utf-8"),
+        0,
+        b"INITIAL\0\0\0\0",
+        14,
+        )
+    else:
+        block_bytes = block_head_struct.pack(
+        reg_block.prev_hash,
+        reg_block.timestamp,
+        reg_block.case_id,
+        reg_block.state,
+        len(reg_block.data))
+    #write to file
+    fp = open(file_path, 'ab')
+    fp.write(block_bytes)
+    fp.close()
+    """
     #check if initial block set hash to zero
     if(len(chain) == 0):
         prev_hash = ""
@@ -110,8 +159,7 @@ def pack_block(case,item,state,timestamp):
     fp = open(file_path, 'ab')
     fp.write(test_pack)
     fp.close()
-    #add_chain(test_pack)
-
+    """
 #prints the chain[]
 def print_chain():
     print("printing chain")
@@ -152,7 +200,7 @@ def make_chain():
             #evidence = blockContents[3]
             #state = blockContents[4].decode('utf-8')
             #data_len = blockContents[5]
-            new_block = Block_tuple(
+            new_block = Block(
                 prev_hash=hash,  # 20 bytes
                 timestamp= datetime.fromtimestamp(blockContents[1]),  # 08 bytes
                 case_id=UUID(bytes=blockContents[2]),  # 16 bytes

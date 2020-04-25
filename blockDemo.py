@@ -81,11 +81,11 @@ block_bytes = block_head_struct.pack(
     b"",
     0,
     bytes("0", "utf-8"),
-    block.evidence_id,
-    block.state,
-    len(block.data),
+    0,
+    b"INITIAL\0\0\0\0",
+    14,
 )
 ##upack it
 print("contensts NEW!!!!!")
-blockContents_new = block_head_struct.unpack(block_bytes)
-print(blockContents_new)
+blockContents_new1 = block_head_struct.unpack(block_bytes)
+print(blockContents_new1)
