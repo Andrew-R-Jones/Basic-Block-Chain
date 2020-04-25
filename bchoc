@@ -5,6 +5,7 @@ import struct
 import sys
 import binascii
 
+from datetime import datetime, time
 from uuid import UUID, uuid4
 from typing import BinaryIO, List, Callable
 import block
@@ -40,8 +41,8 @@ STATE = {
 }
 
 INITIAL = Block(
-    previous_hash=0,
-    time_stamp=0,
+    previous_hash=str(None),
+    time_stamp=get_current_time(),
     case_id=UUID(int=0),
     evidence_item_id=0,
     state=STATE["init"],
@@ -423,9 +424,13 @@ def save_to_file():
 
     with open(file_path, 'wb') as filehandle:
         for block in chain:
+            print(block.previous_hash)
+            print(block.time_stamp.timestamp())
+            print(block.case_id.int.to_bytes(16, byteorder="little"))
+            print(block.evidence_item_id)
             block_bytes = block_head_struct.pack(
-                bytes(block.previous_hash),
-                block.time_stamp,
+                block.previous_hash.encode(),
+                block.time_stamp.timestamp(),
                 block.case_id.int.to_bytes(16, byteorder="little"),
                 block.evidence_item_id,
                 block.state,
@@ -443,26 +448,20 @@ def read_from_file():
 
     try:
         with open(file_path, 'rb') as filehandle:
-            while filehandle:
-                file_block = filehandle.read(block_head_len)
-                blockContents = block_head_struct.unpack(file_block)
-                prevHash = blockContents[0]
-                timeStamp = blockContent[1]
-                caseID = blockContent[2]
-                evidenceID = blockContent[3]
-                blockState = blockContent[4]
-                dataLength = blockContent[5]
 
-                b = Block(
-                    previous_hash=prevHash,
-                    time_stamp=timeStamp,
-                    case_id=caseID,
-                    evidence_item_id=evidenceID,
-                    state=blockState,
-                    data_length=dataLength
-                )
-
-                print(b)
+            file_block = filehandle.read(block_head_len)
+            blockContents = block_head_struct.unpack(file_block)
+            previousHash = blockContents[0]
+            '''
+            b = Block(
+                previous_hash=prevHash,
+                time_stamp=timeStamp,
+                case_id=caseID,
+                evidence_item_id=evidenceID,
+                state=blockState,
+                data_length=dataLength
+            )
+            '''
             '''
             for line in filehandle:
                 # remove linebreak which is the last character of the string

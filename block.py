@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, timezone
 
 def get_current_time():
-    return datetime.datetime.now().isoformat()
+    return datetime.now()
     #return (maya.now()).iso8601()
 
 
