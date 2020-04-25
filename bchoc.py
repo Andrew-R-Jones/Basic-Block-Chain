@@ -15,12 +15,12 @@ from datetime import datetime, timedelta, timezone
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
+file_path = os.environ["BCHOC_FILE_PATH"]
 ########################################################################################
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
+#file_path = 'blockchain'
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
 ########################################################################################
