@@ -365,6 +365,40 @@ def check_duplicate_parents():
     return False
 
 
+# Block contents do not match block checksum.
+# Pretty sure this is covered when the parent hashes
+# if anything is altered, the hashes would be wrong and therefore
+# the checksums would also fail..
+def confirm_checksums():
+
+    return False
+
+
+# this function checks that any removed blocks have not been
+# checked back in or out after the removal
+
+def confirm_removed():
+
+    index = 0
+
+    # nested for loop to match each block to the rest of the blocks 
+    for block in range(len(chain)):
+
+        if block.state == 'RELEASED' or block.state == 'DISPOSED' or block.state == 'DESTROYED':
+            print('chill pythohn lol')
+
+            #iterate the rest of the chain to confirm the item was not checked back in or out
+            for b in chain[index:]:
+                if b.state == 'CHECKEDIN' or b.state == 'CHECKEDOUT':
+                    print('State of blockchain: ERROR')
+                    print(f"Bad block: {hashlib.sha1(repr(block).encode('utf-8')).hexdigest()}")
+                    print('Item checked out or checked in after removal from chain.')
+                    return True
+        else:
+            index = index + 1
+
+    return False
+
 
 '''
 bchoc verify
@@ -380,6 +414,11 @@ def verify():
         exit(1)
     elif verify_parent_hashes():
         exit(1)
+    elif confirm_checksums():
+        exit(1)
+    elif confirm_removed():
+        exit(1)
+    
     else:
         print('State of blockchain: CLEAN')
 
@@ -393,7 +432,7 @@ def verify():
 def run_commands(command):
 
     if command == 'init':
-        init()
+        init(chain)
         exit(0)
 
     else:
@@ -523,3 +562,5 @@ run_commands(commands[0])
 
 # for testing
 #print(f"BLOCK CHAIN START\n{chain}")
+
+
