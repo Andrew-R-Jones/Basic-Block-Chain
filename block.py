@@ -51,8 +51,7 @@ file_path = 'blockchain'
 ########################################################################################
 chain = []
 chain_new = []
-#create empty file uncomment for testing purposes
-#open(file_path, 'w').close()
+
 Block_tuple = namedtuple("Block", ["prev_hash", "timestamp", "case_id", "evidence_id", "state", "d_length", "data"])
 
 STATE = {

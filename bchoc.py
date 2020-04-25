@@ -5,9 +5,10 @@ import block
 import hashlib
 import os
 import struct
-
+import os.path
+from os import path
 from block import get_current_time
-
+from block import make_chain
 
 
 
@@ -18,7 +19,7 @@ from block import get_current_time
 
 ########################################################################################
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain.txt'
+file_path = 'blockchain'
 ########################################################################################
 
 # global list that will hold all blocks and will create the chain
@@ -28,12 +29,11 @@ chain = []
 # returns true if the item was found in the block chain. false, if it was not found
 # return exit code 1 if the block was found in the chain with a released state
 def in_chain(item_id):
-
+    chain = make_chain()
     found = False
     previously_removed = False
-
     for block in chain:
-        if item_id == block.evidence_item_id:
+        if item_id == block.evidence_id:
             found = True
             if block.state == 'RELEASED' or block.state == 'DISPOSED' or block.state == 'DESTROYED':
                 previously_removed = True
@@ -50,22 +50,24 @@ def in_chain(item_id):
 
 
 def get_last_block_hash():
-
+    chain = make_chain()
     last_block = chain[-1]
     sha1 = hashlib.sha1(repr(last_block).encode('utf-8')).hexdigest()
-
     return sha1
 
 
 def add_to_block_chain(case_id, item_id):
-
+    #make sure item_id is type int
+    item_id= int(item_id)
     if not in_chain(item_id):
         previous_hash = get_last_block_hash()
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
-        chain.append(b)
+        #b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
+        #chain.append(b)
+        block.pack_block(case_id,item_id)
         return True
-    else: return False
+    else: 
+        return False
 
 
 '''
@@ -81,8 +83,6 @@ of a newly added item is CHECKEDIN. The given evidence ID must be unique
 def add():
 
     add_output_string = ""
-
-
     if commands[0] == '-c':
         case_id = commands[1]
         commands.pop(0)
@@ -103,8 +103,6 @@ def add():
         item_id = commands.pop(0)
 
         if add_to_block_chain(case_id, item_id):
-
-            #print("Case: " + case_id)
             add_output_string += "\nAdded item: " + item_id
             for block in chain:
                 if block.evidence_item_id == item_id:
@@ -115,7 +113,7 @@ def add():
             exit(1)
 
     print(add_output_string)
-    save_to_file()
+    #save_to_file() #not sure if i 
 
     return None
 
@@ -128,28 +126,28 @@ may only be performed on evidence items that have already been added to the bloc
 
 
 def checkout():
-
     # need to find the last block with item_id i, and check whether it is checked in or checked out
     # iterate from the last element in reverse to find that element
 
     if commands[0] == '-i':
         item_id = commands[1]
-
+        chain = make_chain()
         reverse_chain = chain[::-1]
-
         for b in reverse_chain:
-            if item_id == b.evidence_item_id:
+            if int(item_id) == b.evidence_id:
+                print(b.state)  #why is this not working
+                print('CHECKEDIN')
                 if b.state == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-
+                    
                     previous_hash = get_last_block_hash()
                     # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                    new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
-                    chain.append(new_block)
+                    #new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
+                    #chain.append(new_block)
+                    block.pack_block(b.case_id, b.evidence_id)
                     print("Case: " + new_block.case_id)
                     print("Checked out item: " + new_block.evidence_item_id)
                     print("  Status: " + new_block.state)
                     print("  Time of action: " + str(new_block.time_stamp))
-
                     return
 
                 elif b.state == 'CHECKEDOUT':
@@ -315,7 +313,8 @@ bchoc init
 Sanity check. Only starts up and checks for the initial block.
 '''
 def init():
-
+    if (path.exists(file_path) == False):
+        open(file_path, 'w').close() #create the file
     if read_from_file():
         print('Blockchain file found with INITIAL block.')
     else:
@@ -432,7 +431,7 @@ def verify():
 def run_commands(command):
 
     if command == 'init':
-        init(chain)
+        init()
         exit(0)
 
     else:
@@ -487,10 +486,20 @@ def run_commands(command):
     save_to_file()
 
 # saves the list of blocks to a file
-
-
+def read_from_file():
+    #get the chain from block
+    chain = make_chain()
+    if len(chain) == 0:
+        block.pack_block(0,0) #initial block paramters
+        chain = make_chain() #chain now holds init block might not need it
+        return False
+    else:
+        return True
 def save_to_file():
-
+    #dont need it
+    print()
+"""
+def save_to_file():
     with open(file_path, 'w') as filehandle:
         for block in chain:
             filehandle.write('%s\n' % block)
@@ -499,17 +508,9 @@ def save_to_file():
 # reads and restores the saved blocks from file, and add to list 'chain'
 # returns True if blockchain file was previous created
 # returns False if no blockchain file was found
-def read_from_file():
-    #get the chain from block
-    chain = block.make_chain()
-    if len(chain) == 0:
-        block.pack_block(0,0) #initial block paramters
-        chain = block.make_chain() #chain now holds init block might not need it
-        return False
-    else:
-        return True
-"""
+
 old code
+
 def read_from_file():
     l = []
     count = 0
@@ -543,8 +544,7 @@ def read_from_file():
         save_to_file()
 
         return False
-        """
-
+"""        
 # initial call from command line
 # ensures enough args given
 if len(sys.argv) < 2:
