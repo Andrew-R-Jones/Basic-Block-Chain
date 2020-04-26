@@ -30,11 +30,11 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
-debug = False
+#file_path = os.environ["BCHOC_FILE_PATH"]
+#debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
-#debug = True
+file_path = 'blockchain'
+debug = True
 ########################################################################################
 
 def get_current_time():
@@ -83,13 +83,13 @@ block_head_len = struct.calcsize(block_head_fmt)
 block_head_struct = struct.Struct(block_head_fmt)
 
 #pack and write to file
-def pack_block(case,item,state,timestamp):
+def pack_block(case,item,state,timestamp, data):
     #======================================================================
     # packing the structure
     #======================================================================
     #we have an initial block that I hard code and then the reg_block
     b=Block(1,2,3,4,5,6,7)
-    if(state == "init"):
+    if(state == "INITIAL"):
         data=b"Initial block\0"
         case_id=UUID(int=0)  # 16 bytes
         case_bytes = case_id.int.to_bytes(16, byteorder="little") #or "big"
@@ -157,32 +157,40 @@ def pack_block(case,item,state,timestamp):
 def make_chain():
     chain=[]
     with open(file_path, 'rb') as openfileobject:
-        for block in iter(partial(openfileobject.read, 68), b''):
-            blockContents = block_head_struct.unpack(block)
-            hash = blockContents[0]
-            from binascii import hexlify
-            hash= hexlify(hash).decode('ascii')
-            new_block = Block(1,2,3,4,5,6,7)
-            new_block.previous_hash=hash  # 20 bytes
-            new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
-            new_block.case_id=UUID(bytes=blockContents[2])  # 16 bytes
-            new_block.evidence_item_id=blockContents[3]  # 04 bytes
-            new_block.state=blockContents[4].decode('utf-8')  # 11 bytes
-            new_block.data_length=blockContents[5]  # 04 bytes                
-            new_block.data = ""
-            d_raw = openfileobject.read(new_block.data_length)
-            x = struct.unpack("%ds" % (new_block.data_length), d_raw)
-            new_block.data = x[0]
-            if debug:
-                print("----------makechain()----------")
-                print("Hash:", new_block.previous_hash)
-                print("timestamp:",new_block.time_stamp)
-                print("caseID:",new_block.case_id)
-                print("evidenceID:",new_block.evidence_item_id)
-                print("state:",new_block.state)
-                print("data len:",new_block.data_length)
-                print("data:",new_block.data)
-                print("------------------------------")
-            chain.append(new_block)
-        openfileobject.close()
-        return chain
+        #if you cannot get68 bytes
+        try:
+            for block in iter(partial(openfileobject.read, 68), b''):
+                blockContents = block_head_struct.unpack(block)
+                blockContents = block_head_struct.unpack(block)
+                hash = blockContents[0]
+                from binascii import hexlify
+                hash= hexlify(hash).decode('ascii')
+                new_block = Block(1,2,3,4,5,6,7)
+                new_block.previous_hash=hash  # 20 bytes
+                new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
+                new_block.case_id=UUID(bytes=blockContents[2])  # 16 bytes
+                new_block.evidence_item_id=blockContents[3]  # 04 bytes
+                new_block.state=blockContents[4].decode('utf-8')  # 11 bytes
+                new_block.data_length=blockContents[5]  # 04 bytes                
+                new_block.data = ""
+                d_raw = openfileobject.read(new_block.data_length)
+                x = struct.unpack("%ds" % (new_block.data_length), d_raw)
+                new_block.data = x[0]
+                if debug:
+                    print("----------makechain()----------")
+                    print("Hash:", new_block.previous_hash)
+                    print("timestamp:",new_block.time_stamp)
+                    print("caseID:",new_block.case_id)
+                    print("evidenceID:",new_block.evidence_item_id)
+                    print("state:",new_block.state)
+                    print("data len:",new_block.data_length)
+                    print("data:",new_block.data)
+                    print("------------------------------")
+                chain.append(new_block)
+            openfileobject.close()
+            return chain
+        except:
+            print("corrupted block")
+            exit(1)
+        
+            

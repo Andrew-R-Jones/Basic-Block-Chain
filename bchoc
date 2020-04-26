@@ -62,12 +62,7 @@ def add_to_block_chain(case_id, item_id):
     #make sure item_id is type int
     item_id= int(item_id)
     if not in_chain(item_id):
-        previous_hash = get_last_block_hash()
-        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        #b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
-        #chain.append(b)
-
-        block.pack_block(case_id,item_id, "in", datetime.timestamp(datetime.now()))
+        block.pack_block(case_id,item_id, "CHECKEDIN",datetime.utcnow().timestamp(),"")
         return True
     else: 
         return False
@@ -136,13 +131,16 @@ def checkout():
         item_id = commands[1]
         chain = make_chain()
         reverse_chain = chain[::-1]
+        found = False
         for b in reverse_chain:
             print(b.evidence_item_id)
             if int(item_id) == b.evidence_item_id:
+                found=True
                 state_val = b.state.strip(' \t\r\n\0') #strip padding
                 if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
                     timestamp=datetime.utcnow().timestamp()
-                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp)
+                    state_val = 'CHECKEDOUT'
+                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp,"")
                     #got to get the timestamp..... need to add state and timestamp
                     print("Case: " + str(b.case_id))
                     print("Checked out item: " + str(b.evidence_item_id))
@@ -156,6 +154,9 @@ def checkout():
                     #return 1
                     exit(1) #changed by Jared, if you do echo $? it says 0 unless
                     # you specify exit(1) instead of return 1
+        if not found:
+            print("item not found in the block")
+            exit(1)
     else:
         print("Invalid command")
         return 1
@@ -169,32 +170,47 @@ Add a new checkin entry to the chain of custody for the given evidence item. Che
 only be performed on evidence items that have already been added to the blockchain.
 '''
 
-
 def checkin():
 
     if commands[0] == '-i':
         item_id = commands[1]
+        found = False
+        chain = make_chain()
+        case = 0
+        evidence = 0
+        checked_in = True
+        disposed = False
+        destroyed = False
+        released = False
         for b in chain:
-            if item_id == b.evidence_item_id:
+            if item_id == str(b.evidence_item_id):
+                found=True
+                case = b.case_id
+                evidence = b.evidence_item_id
+                if b.state.strip(' \t\r\n\0') == "CHECKEDIN":
+                    checked_in = True
+                elif b.state.strip(' \t\r\n\0') == "CHECKEDOUT":
+                    checked_in = False
+                elif b.state.strip(' \t\r\n\0') == "DESTROYED":
+                    destroyed = True
+                elif b.state.strip(' \t\r\n\0') == "DISPOSED":
+                    disposed = True
+        if not found:
+            print("Item not in blockChain")
+            exit(1)
+        if disposed:
+            print("cannot checkin item that has been disposed")
+            exit(1)
+        if checked_in:
+            print("error already checked in")
+            exit(1)
 
-                previous_hash = get_last_block_hash()
-                # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDIN')
-                chain.append(new_block)
-                print("Case: " + new_block.case_id)
-                print("Checked in item: " + new_block.evidence_item_id)
-                print("  Status: " + new_block.state)
-                print("  Time of action: " + str(new_block.time_stamp))
-                return
-
-                '''
-                block.state = 'CHECKEDIN'
-                block.time_stamp = get_current_time()
-                print("Case: " + block.case_id)
-                print("Checked in item: " + block.evidence_item_id)
-                print("  Status: " + block.state)
-                print("  Time of action: " + str(block.time_stamp))
-                '''
+        block.pack_block(case,evidence,"CHECKEDIN",datetime.utcnow().timestamp(),"")
+        print("Case: " + str(case))
+        print("Checked in item: " + str(evidence))
+        print("  Status: " + "CHECKEDIN")
+        print("  Time of action: " + get_current_time())
+        return 
     else:
         print("Invalid command")
         return 1
@@ -245,26 +261,39 @@ item must have a state of CHECKEDIN for the action to succeed.
 '''
 
 def remove():
-
     released = False
 
     if commands[0] == '-i':
         commands.pop(0)
         item_id = commands[0]
         commands.pop(0)
+        chain = make_chain()
+        checked_in = False #determine the last status of the item
+        found = False #check if the item has been in block
+        pack_item = 0
+        pack_data = ""
+        pack_state = ""
+        pack_case = 0
         for b in chain[::-1]:
-            if item_id == b.evidence_item_id:
-                if b.state != "CHECKEDIN":
-                    return
+            if item_id == str(b.evidence_item_id):
+                found = True
+                released = False
+                pack_case = b.case_id
+                pack_item = b.evidence_item_id
+                if b.state.strip(' \t\r\n\0') == "CHECKEDIN":
+                    checked_in = True
+                elif b.state.strip(' \t\r\n\0') == "CHECKEDOUT":
+                    checked_in = False
                 if commands[0] == '-y' or commands[0] == '--why':
                     commands.pop(0)
                     state = commands[0]
+                    pack_state = state
                     if state == 'RELEASED':
                         released = True
                         commands.pop(0)
                         if commands[0] == '-o':
                             commands.pop(0)
-                            new_block_data = commands[0].strip('\"')
+                            pack_data = commands[0].strip('\"')
                         else:
                             print("Need to add -o REASON")
                             return 1
@@ -276,27 +305,21 @@ def remove():
                 else:
                     print("Invalid Syntax")
                     return 1
-                print("Case: " + b.case_id)
-                print("Removed item: " + b.evidence_item_id)
+                print("Case: " + str(b.case_id))
+                print("Removed item: " + str(b.evidence_item_id))
                 print("  Status: " + state)
                 if released:
-                    print("  Owner info: " + new_block_data)
-                print("  Time of action: " + b.time_stamp)
-
-                previous_hash = get_last_block_hash()
-                # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-
+                    print("  Owner info: " + pack_data)
+                print("  Time of action: " + get_current_time())
+                
                 if released:
-                    new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, state, new_block_data, len(
-                    new_block_data.encode('utf-8')) + 1)
-
+                    block.pack_block(pack_case, pack_item, pack_state, datetime.utcnow().timestamp(),pack_data)
                 else:
-                    new_block = block.Block(previous_hash, b.case_id, b.evidence_item_id, state)
-
-                chain.append(new_block)
+                    if debug:
+                        print("################################################################Else pack_case:",pack_case)
+                    block.pack_block(pack_case, pack_item, pack_state, datetime.utcnow().timestamp(),pack_data)
 
                 return None
-
         print("Item id not found")
         return 1
     else:
@@ -427,6 +450,9 @@ def verify():
 def run_commands(command):
 
     if command == 'init':
+        if len(commands) > 1:
+            print("too many parameters")
+            exit(1)
         init()
         exit(0)
 
@@ -486,7 +512,7 @@ def read_from_file():
     chain = make_chain()
     if len(chain) == 0:
         timestamp = datetime.utcnow().timestamp()
-        block.pack_block(0,0,"init",timestamp) #initial block paramters
+        block.pack_block(0,0,"INITIAL",timestamp,"") #initial block paramters
         chain = make_chain() #chain now holds init block might not need it
         return False
     else:
