@@ -30,11 +30,11 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
-#debug = False
+file_path = os.environ["BCHOC_FILE_PATH"]
+debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
-debug = True
+#file_path = 'blockchain'
+#debug = True
 ########################################################################################
 
 def get_current_time():
@@ -102,10 +102,26 @@ def pack_block(case,item,state,timestamp):
     else:
         chain = make_chain()
         last_block = chain[-1]
+        if debug:
+            print("-----last block-------")
+            print(last_block.previous_hash)
+            print("timestamp:",last_block.time_stamp)
+            print("caseID:",last_block.case_id)
+            print("evidenceID:",last_block.evidence_item_id)
+            print("state:",last_block.state)
+            print("data len:",last_block.data_length)
+            print("data:",last_block.data)
+            print("------------------------------")
+        #forcing it to work
         b.previous_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest()
+        if debug:
+            print("state:"+last_block.state.strip(' \t\r\n\0')+":" )
+            print(last_block.state.strip(' \t\r\n\0') == "INITIAL")
+        #if(last_block.state == "INITIAL"):
+        #    b.previous_hash = b''
         b.time_stamp=timestamp
-        case_id=UUID(case)  
-        case_bytes = case_id.bytes_le # 16 bytes little indian
+        case_uuid = UUID(str(case))
+        case_bytes = case_uuid.int.to_bytes(16, byteorder="little") #or "big"
         b.case_id=case_bytes
         b.evidence_item_id=item
         b.state = STATE[state]

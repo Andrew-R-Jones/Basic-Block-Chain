@@ -142,10 +142,10 @@ def checkout():
                 state_val = b.state.strip(' \t\r\n\0') #strip padding
                 if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
                     timestamp=datetime.utcnow().timestamp()
-                    block.pack_block(b.case_id, b.evidence_id, state_val, timestamp)
+                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp)
                     #got to get the timestamp..... need to add state and timestamp
                     print("Case: " + str(b.case_id))
-                    print("Checked out item: " + str(b.evidence_id))
+                    print("Checked out item: " + str(b.evidence_item_id))
                     print("  Status: " + state_val)
                     print("  Time of action: " + str(timestamp))
                     return

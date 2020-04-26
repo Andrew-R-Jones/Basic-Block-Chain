@@ -14,11 +14,11 @@ from datetime import datetime, timedelta, timezone
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
-#debug = False
+file_path = os.environ["BCHOC_FILE_PATH"]
+debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
-debug = True
+#file_path = 'blockchain'
+#debug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
@@ -142,10 +142,10 @@ def checkout():
                 state_val = b.state.strip(' \t\r\n\0') #strip padding
                 if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
                     timestamp=datetime.utcnow().timestamp()
-                    block.pack_block(b.case_id, b.evidence_id, state_val, timestamp)
+                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp)
                     #got to get the timestamp..... need to add state and timestamp
                     print("Case: " + str(b.case_id))
-                    print("Checked out item: " + str(b.evidence_id))
+                    print("Checked out item: " + str(b.evidence_item_id))
                     print("  Status: " + state_val)
                     print("  Time of action: " + str(timestamp))
                     return
