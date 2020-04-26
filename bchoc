@@ -15,8 +15,10 @@ from datetime import datetime, timedelta, timezone
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
 #file_path = os.environ["BCHOC_FILE_PATH"]
+#debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
 file_path = 'blockchain'
+debug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
@@ -55,6 +57,8 @@ def get_last_block_hash():
 
 
 def add_to_block_chain(case_id, item_id):
+    if debug:
+        print("add to block ITEMID:",item_id)
     #make sure item_id is type int
     item_id= int(item_id)
     if not in_chain(item_id):
@@ -62,6 +66,7 @@ def add_to_block_chain(case_id, item_id):
         # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
         #b = block.Block(previous_hash, case_id, item_id, 'CHECKEDIN')
         #chain.append(b)
+
         block.pack_block(case_id,item_id, "in", datetime.timestamp(datetime.now()))
         return True
     else: 
@@ -99,7 +104,8 @@ def add():
     while commands:
         commands.pop(0)
         item_id = commands.pop(0)
-
+        if debug:
+            print("at input item_id:", item_id)
         if add_to_block_chain(case_id, item_id):
             add_output_string += "\nAdded item: " + item_id
             for block in chain:
@@ -111,7 +117,6 @@ def add():
             exit(1)
 
     print(add_output_string)
-    #save_to_file() #not sure if i 
 
     return None
 
@@ -136,12 +141,7 @@ def checkout():
             if int(item_id) == b.evidence_item_id:
                 state_val = b.state.strip(' \t\r\n\0') #strip padding
                 if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-                    previous_hash = get_last_block_hash()
-                    # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                    #new_block = block.Block(previous_hash, b.case_id, item_id, 'CHECKEDOUT')
-                    #chain.append(new_block)
-
-                    timestamp=datetime.timestamp(datetime.now())
+                    timestamp=datetime.utcnow().timestamp()
                     block.pack_block(b.case_id, b.evidence_id, state_val, timestamp)
                     #got to get the timestamp..... need to add state and timestamp
                     print("Case: " + str(b.case_id))
@@ -357,7 +357,6 @@ def check_duplicate_parents():
         # otherwise add the hash to the list
         else:
             parent_list.append(parent_hash)
-
     return False
 
 
@@ -480,68 +479,19 @@ def run_commands(command):
     elif command == 'verify':
         verify()
 
-    #save_to_file()
 
 # saves the list of blocks to a file
 def read_from_file():
     #get the chain from block
     chain = make_chain()
     if len(chain) == 0:
-        block.pack_block(0,0,"init",0) #initial block paramters
+        timestamp = datetime.utcnow().timestamp()
+        block.pack_block(0,0,"init",timestamp) #initial block paramters
         chain = make_chain() #chain now holds init block might not need it
         return False
     else:
         return True
-def save_to_file():
-    #dont need it
-    print()
-"""
-def save_to_file():
-    with open(file_path, 'w') as filehandle:
-        for block in chain:
-            filehandle.write('%s\n' % block)
-
-
-# reads and restores the saved blocks from file, and add to list 'chain'
-# returns True if blockchain file was previous created
-# returns False if no blockchain file was found
-
-old code
-
-def read_from_file():
-    l = []
-    count = 0
-    # define an empty list
-    # open file and read the content in a list
-
-    try:
-        with open(file_path, 'r') as filehandle:
-
-            for line in filehandle:
-                # remove linebreak which is the last character of the string
-                item = line[:-1]
-
-                # add item to the list
-                l.append(item)
-                count = count + 1
-
-                if count == 7:
-                    #  previous_hash, case_id, evidence_item_id, state,data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-                    b = block.Block(l[0], l[2],  l[3],  l[4], l[6], l[5], time_stamp=l[1])
-                    chain.append(b)
-                    l = []
-                    count = 0
-        
-        return True
-
-    except:
-        # previous_hash, case_id, evidence_item_id, state, data, data_length = len(data.encode('utf-8')) + 1, time_stamp=get_current_time()
-        b = block.Block(None, None, None, 'INITIAL', 'Initial block', 14)
-        chain.append(b)
-        save_to_file()
-
-        return False
-"""        
+      
 # initial call from command line
 # ensures enough args given
 if len(sys.argv) < 2:
@@ -554,8 +504,3 @@ commands = sys.argv[1:]
 
 # calls function the run first command
 run_commands(commands[0])
-
-# save_to_file()
-
-# for testing
-#print(f"BLOCK CHAIN START\n{chain}")
