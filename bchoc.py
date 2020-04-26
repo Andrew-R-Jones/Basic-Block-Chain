@@ -129,42 +129,53 @@ def checkout():
     if commands[0] == '-i':
         item_id = commands[1]
         chain = make_chain()
-        reverse_chain = chain[::-1]
+        #reverse_chain = chain[::-1]
         found = False
         disposed = False
         destroyed = False
         released = False
-        for b in reverse_chain:
-            print(b.evidence_item_id)
+        checked_in = False
+        for b in chain:
             if int(item_id) == b.evidence_item_id:
                 found=True
-                state_val = b.state.strip(' \t\r\n\0') #strip padding
-
-
-                if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-                    timestamp=datetime.utcnow().timestamp()
-                    state_val = 'CHECKEDOUT'
-                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp,"")
-                    #got to get the timestamp..... need to add state and timestamp
-                    print("Case: " + str(b.case_id))
-                    print("Checked out item: " + str(b.evidence_item_id))
-                    print("  Status: " + state_val)
-                    print("  Time of action: " + str(timestamp))
-                    return
-
-                elif b.state == 'CHECKEDOUT':
-                    print("Error: Cannot check out a checked out item. " +
-                          "Must check it in first.")
-                    #return 1
-                    exit(1) #changed by Jared, if you do echo $? it says 0 unless
-                    # you specify exit(1) instead of return 1
+                if b.state.strip(' \t\r\n\0') == "CHECKEDIN":
+                    checked_in = True
+                elif b.state.strip(' \t\r\n\0') == "CHECKEDOUT":
+                    checked_in = False
+                elif b.state.strip(' \t\r\n\0') == "DESTROYED":
+                    destroyed = True
+                elif b.state.strip(' \t\r\n\0') == "DISPOSED":
+                    disposed = True
+                elif b.state.strip(' \t\r\n\0') == "RELEASED":
+                    released = True
         if not found:
-            print("item not found in the block")
+            print("Item not in blockChain")
             exit(1)
+        if disposed:
+            print("cannot checkout item that has been disposed")
+            exit(1)
+        if destroyed:
+            print("cannot checkout item that has been destroyed")
+            exit(1)
+        if released:
+            print("cannot checkout item that has been released")
+            exit(1)
+        if not checked_in:
+             print("Error: Cannot check out a checked out item.")
+             exit(1)
+        if checkin:   # need to add a new block 'transaction' at the end of the chain for the check out
+            timestamp=datetime.utcnow().timestamp()
+            state_val = 'CHECKEDOUT'
+            block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp,"")
+            #got to get the timestamp..... need to add state and timestamp
+            print("Case: " + str(b.case_id))
+            print("Checked out item: " + str(b.evidence_item_id))
+            print("  Status: " + state_val)
+            print("  Time of action: " + str(timestamp))
+            return
     else:
         print("Invalid command")
         return 1
-
     return None
 
 
@@ -227,9 +238,8 @@ bchoc log [-r] [-n num_entries] [-c case_id] [-i item_id]
 Display the blockchain entries giving the oldest first (unless -r is given).
 '''
 
-
 def log(reverse, num_entries, item_id):
-
+    chain = make_chain()
     count = 0
 
     # -1 means no -n amount was entered
@@ -246,12 +256,13 @@ def log(reverse, num_entries, item_id):
 
         # iterate through the chain and display the blocks with specified item id's information
         # if num_entries was provided the for loop iterates n times, otherwise it iterates the entire chain
-        if item_id == block.evidence_item_id:
+
+        if str(item_id) == str(block.evidence_item_id):
             count = count + 1
-            print("Case: " + block.case_id)
-            print("Item: " + block.evidence_item_id)
+            print("Case: " + str(block.case_id))
+            print("Item: " + str(block.evidence_item_id))
             print("Action: " + block.state)
-            print("Time of action: " + block.time_stamp)
+            print("Time of action: " + str(block.time_stamp))
             print("")
             if count == num_entries:
                 return
