@@ -126,7 +126,7 @@ def checkout():
     if commands[0] == '-i':
         item_id = commands[1]
         if debug:
-            print("passed int to checkout")
+            print("passed int to checkout!!!!!!!!!!!!!!!!!")
             print(item_id)
         chain = make_chain()
         found = False
@@ -250,6 +250,7 @@ def log(reverse, num_entries, item_id, case_id):
         print("reverse:", reverse)
         print("num entries:",num_entries)
         print("item_id",item_id)
+        print("case_id:",case_id)
     chain = make_chain()
     count = 0
 
@@ -271,7 +272,11 @@ def log(reverse, num_entries, item_id, case_id):
             print("Time: ", block.time_stamp)
             print("")
             count += 1
-            if count == num_entries:
+            if debug:
+                print("count:",count)
+                print("num_entries:",num_entries)
+                print(int(count) == int(num_entries))
+            if int(count) == int(num_entries):
                 exit(0)
     #print by case ID
     elif(item_id == str(-1) and case_id != str(-1)):
@@ -289,6 +294,18 @@ def log(reverse, num_entries, item_id, case_id):
     elif(item_id != str(-1) and case_id == str(-1)):
         for block in c:
             if str(block.evidence_item_id) == item_id:
+                print("Case: " + str(block.case_id))
+                print("Item: " + str(block.evidence_item_id))
+                print("Action: " + block.state.strip(' \t\r\n\0'))
+                print("Time: " + block.time_stamp)
+                print("")
+                count += 1
+                if count == num_entries:
+                    exit(0)
+        #print by item ID and Case_id
+    elif(item_id != str(-1) and case_id != str(-1)):
+        for block in c:
+            if str(block.evidence_item_id) == item_id and str(block.case_id) == case_id:
                 print("Case: " + str(block.case_id))
                 print("Item: " + str(block.evidence_item_id))
                 print("Action: " + block.state.strip(' \t\r\n\0'))

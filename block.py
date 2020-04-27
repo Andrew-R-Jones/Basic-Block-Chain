@@ -150,7 +150,7 @@ def convert_hex(str, enc1, enc2):
     return int2bytes(int.from_bytes(bytes.fromhex(str), enc1), enc2).hex()
 def int2bytes(i, enc):
     return i.to_bytes((i.bit_length() + 7) // 8, enc)
-
+    
 #makes the chain   
 def make_chain():
     chain=[]
@@ -167,8 +167,10 @@ def make_chain():
                 new_block.time_stamp=str(datetime.fromtimestamp(blockContents[1]).isoformat())+"Z"
                 #new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
                 #case id fliping from little to big endian
-                t2 = str(UUID(bytes=blockContents[2])).replace("-","")
+                t2 = str(UUID(bytes=blockContents[2])).replace("-","") #loses leading zero
                 t3 = convert_hex(t2, "little", "big")
+                #check the length. leading zeros will be cut off add with zfill
+                t3 = t3.zfill(32)
                 t3 = t3[:8] + '-' + t3[8:12] + '-' + t3[12:16] + '-' + t3[16:20] + '-' + t3[20:]
                 new_block.case_id=t3
                 #check if empty if so just cast to UUID
