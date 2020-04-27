@@ -30,11 +30,11 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-#file_path = os.environ["BCHOC_FILE_PATH"]
-#debug = False
+file_path = os.environ["BCHOC_FILE_PATH"]
+debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-file_path = 'blockchain'
-debug = True
+#file_path = 'blockchain'
+#debug = True
 ########################################################################################
 
 def get_current_time():
@@ -125,7 +125,7 @@ def pack_block(case,item,state,timestamp, data):
         b.case_id=case_bytes
         b.evidence_item_id=item
         b.state = STATE[state]
-        b.data = ""
+        b.data = data
         b.data_length = len(b.data)
         if debug:
             print("----------PACKING----------")

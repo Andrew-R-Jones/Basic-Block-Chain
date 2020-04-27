@@ -124,43 +124,67 @@ may only be performed on evidence items that have already been added to the bloc
 
 
 def checkout():
-    # need to find the last block with item_id i, and check whether it is checked in or checked out
-    # iterate from the last element in reverse to find that element
-
     if commands[0] == '-i':
         item_id = commands[1]
+        if debug:
+            print("passed int to checkout")
+            print(item_id)
         chain = make_chain()
-        reverse_chain = chain[::-1]
         found = False
-        for b in reverse_chain:
-            print(b.evidence_item_id)
-            if int(item_id) == b.evidence_item_id:
+        disposed = False
+        destroyed = False
+        released = False
+        checked_in = False
+        case = ""
+        for b in chain:
+            if str(item_id) == str(b.evidence_item_id):
                 found=True
-                state_val = b.state.strip(' \t\r\n\0') #strip padding
-                if state_val == 'CHECKEDIN':   # need to add a new block 'transaction' at the end of the chain for the check out
-                    timestamp=datetime.utcnow().timestamp()
-                    state_val = 'CHECKEDOUT'
-                    block.pack_block(b.case_id, b.evidence_item_id, state_val, timestamp,"")
-                    #got to get the timestamp..... need to add state and timestamp
-                    print("Case: " + str(b.case_id))
-                    print("Checked out item: " + str(b.evidence_item_id))
-                    print("  Status: " + state_val)
-                    print("  Time of action: " + str(timestamp))
-                    return
-
-                elif b.state == 'CHECKEDOUT':
-                    print("Error: Cannot check out a checked out item. " +
-                          "Must check it in first.")
-                    #return 1
-                    exit(1) #changed by Jared, if you do echo $? it says 0 unless
-                    # you specify exit(1) instead of return 1
+                case = str(b.case_id)
+                if b.state.strip(' \t\r\n\0') == "CHECKEDIN":
+                    if debug:
+                        print("does it checked in?")
+                    checked_in = True
+                elif b.state.strip(' \t\r\n\0') == "CHECKEDOUT":
+                    if debug:
+                        print("does it find checked out?")
+                        print("evidenc_item_id: ", b.evidence_item_id)
+                        print("item_id", int(item_id))
+                    checked_in = False
+                elif b.state.strip(' \t\r\n\0') == "DESTROYED":
+                    destroyed = True
+                elif b.state.strip(' \t\r\n\0') == "DISPOSED":
+                    disposed = True
+                elif b.state.strip(' \t\r\n\0') == "RELEASED":
+                    released = True
         if not found:
-            print("item not found in the block")
+            print("Item not in blockChain")
             exit(1)
+        if disposed:
+            print("cannot checkout item that has been disposed")
+            exit(1)
+        if destroyed:
+            print("cannot checkout item that has been destroyed")
+            exit(1)
+        if released:
+            print("cannot checkout item that has been released")
+            exit(1)
+        if not checked_in:
+             print("Error: Cannot check out a checked out item.")
+             exit(1)
+        if checkin:   # need to add a new block 'transaction' at the end of the chain for the check out
+            timestamp=datetime.utcnow().timestamp()
+            state_val = 'CHECKEDOUT'
+           #block.pack_block(case_id,item_id, "CHECKEDIN",datetime.utcnow().timestamp(),"")
+            block.pack_block(case, int(item_id), state_val, timestamp,"")
+            #got to get the timestamp..... need to add state and timestamp
+            print("Case: " + str(case))
+            print("Checked out item: ", item_id)
+            print("  Status: " + state_val)
+            print("  Time of action: " + str(timestamp))
+            return
     else:
         print("Invalid command")
         return 1
-
     return None
 
 
@@ -219,13 +243,16 @@ def checkin():
 
 
 '''
-bchoc log [-r] [-n num_entries] [-c case_id] [-i item_id]
+bchoc log [-r] [-n num_entries] [-i item_id]
 Display the blockchain entries giving the oldest first (unless -r is given).
 '''
-
-
-def log(reverse, num_entries, item_id):
-
+#false, -1 -1
+def log(reverse, num_entries, item_id, case_id):
+    if debug:
+        print("reverse:", reverse)
+        print("num entries:",num_entries)
+        print("item_id",item_id)
+    chain = make_chain()
     count = 0
 
     # -1 means no -n amount was entered
@@ -237,20 +264,41 @@ def log(reverse, num_entries, item_id):
         c = chain[::-1]
     else:
         c = chain
-
-    for block in c:
-
-        # iterate through the chain and display the blocks with specified item id's information
-        # if num_entries was provided the for loop iterates n times, otherwise it iterates the entire chain
-        if item_id == block.evidence_item_id:
-            count = count + 1
-            print("Case: " + block.case_id)
-            print("Item: " + block.evidence_item_id)
-            print("Action: " + block.state)
-            print("Time of action: " + block.time_stamp)
+    #if no item id or case id print as many as specified. if -1 print all
+    if(item_id == str(-1) and case_id == str(-1)):
+        for block in c:
+            print("Case: ", str(block.case_id))
+            print("Item: ", str(block.evidence_item_id))
+            print("Action: ", str(block.state).strip(' \t\r\n\0'))
+            print("Time: ", block.time_stamp)
             print("")
+            count += 1
             if count == num_entries:
-                return
+                exit(0)
+    #print by case ID
+    elif(item_id == str(-1) and case_id != str(-1)):
+        for block in c:
+            if str(block.case_id) == case_id:
+                print("Case: " + str(block.case_id))
+                print("Item: " + str(block.evidence_item_id))
+                print("Action: " + block.state)
+                print("Time: " + str(block.time_stamp))
+                print("")
+                count += 1
+                if(count == num_entries):
+                    exit(0)
+    #print by item ID
+    elif(item_id != str(-1) and case_id == str(-1)):
+        for block in c:
+            if str(block.evidence_item_id) == item_id:
+                print("Case: " + str(block.case_id))
+                print("Item: " + str(block.evidence_item_id))
+                print("Action: " + block.state)
+                print("Time: " + block.time_stamp)
+                print("")
+                count += 1
+                if count == num_entries:
+                    exit(0)
     return None
 
 
@@ -473,31 +521,41 @@ def run_commands(command):
         commands.remove('checkin')
         checkin()
     elif command == 'log':
+        num_entries = -1
+        reverse = False
+        item_id = "-1"
+        case_id = "-1"
         commands.remove('log')
-
-        # ensures there is at least two commands given -i abc123
-        if len(commands) < 2: 
-            exit(1)
-
-        if commands[0] == '-r' or commands[0] == '--reverse':
-            reverse = True
-            commands.pop(0)
-        else:
-            reverse = False
-        if commands[0] == '-n':
-            num_entries = int(commands[1])
-            commands.pop(0)
-            commands.pop(0)
-        else:
-            num_entries = -1
-
-        if commands[0] == '-i':
-            item_id = commands[1]
-        else:
-            print("no item id provided")
-            return
-        log(reverse, num_entries, item_id)
-
+        if debug:
+            print("length of commands:",len(commands))
+        if len(commands) == 0:
+            log(reverse, num_entries, item_id, case_id)
+            exit(0)
+        elif len(commands) == 1: #only -r can do this
+            log(reverse, num_entries, item_id, case_id)
+            exit(0)
+        #at this point we have 2 or more commands -n 15 or -r -n 15
+        while(len(commands) != 0):
+            if commands[0] == '-r' or commands[0] == '--reverse':
+                reverse = True
+                commands.pop(0)
+                continue
+            elif commands[0] == '-n':
+                num_entries = commands[1]
+                commands.pop(0)
+                commands.pop(0)
+            elif commands[0] == '-c':
+                case_id = commands[1]
+                commands.pop(0)
+                commands.pop(0)
+            elif commands[0] == '-i':
+                item_id = commands[1]
+                commands.pop(0)
+                commands.pop(0)
+            else:
+                print("invalid entry")
+                exit(1)
+        log(reverse, num_entries, item_id, case_id)
     elif command == 'remove':
         commands.remove('remove')
         remove()

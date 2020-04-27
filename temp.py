@@ -33,3 +33,11 @@ print(t3)
 t4 = UUID(bytes=t3)
 print(t4)
 #t1.int.to_bytes(16, byteorder="little") #or "big"
+print("while")
+l = [3,4]
+while(len(l) != 0):
+    print(l[0])
+    print(l[1])
+    l.pop(0)
+    l.pop(0)
+print("and we are out")
