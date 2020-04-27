@@ -174,7 +174,6 @@ def checkout():
         if checkin:   # need to add a new block 'transaction' at the end of the chain for the check out
             timestamp=datetime.utcnow().timestamp()
             state_val = 'CHECKEDOUT'
-           #block.pack_block(case_id,item_id, "CHECKEDIN",datetime.utcnow().timestamp(),"")
             block.pack_block(case, int(item_id), state_val, timestamp,"")
             #got to get the timestamp..... need to add state and timestamp
             print("Case: " + str(case))

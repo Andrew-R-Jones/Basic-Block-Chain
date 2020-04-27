@@ -92,6 +92,7 @@ def pack_block(case,item,state,timestamp, data):
     if(state == "INITIAL"):
         data=b"Initial block\0"
         case_id=UUID(int=0)  # 16 bytes
+        case_bytes = case_id.int.to_bytes(16, byteorder="little") #or "big
         case_bytes = case_id.int.to_bytes(16, byteorder="little") #or "big"
         bock_pack = block_head_struct.pack(b"",timestamp,case_bytes,0,b"INITIAL\0\0\0\0",14,)
         data_pack = struct.pack("14s",data)
@@ -102,25 +103,16 @@ def pack_block(case,item,state,timestamp, data):
     else:
         chain = make_chain()
         last_block = chain[-1]
-        if debug:
-            print("-----last block-------")
-            print(last_block.previous_hash)
-            print("timestamp:",last_block.time_stamp)
-            print("caseID:",last_block.case_id)
-            print("evidenceID:",last_block.evidence_item_id)
-            print("state:",last_block.state)
-            print("data len:",last_block.data_length)
-            print("data:",last_block.data)
-            print("------------------------------")
         #forcing it to work
         b.previous_hash = hashlib.sha1(repr(last_block).encode('utf-8')).digest()
         if debug:
             print("state:"+last_block.state.strip(' \t\r\n\0')+":" )
             print(last_block.state.strip(' \t\r\n\0') == "INITIAL")
-        #if(last_block.state == "INITIAL"):
-        #    b.previous_hash = b''
         b.time_stamp=timestamp
         case_uuid = UUID(str(case))
+        if debug:
+            print("right before!!!!!!!!!!!!!")
+            print(case_uuid)
         case_bytes = case_uuid.int.to_bytes(16, byteorder="little") #or "big"
         b.case_id=case_bytes
         b.evidence_item_id=item
@@ -152,23 +144,40 @@ def pack_block(case,item,state,timestamp, data):
         fp.write(block_pack)
         fp.write(data_pack)
         fp.close()
-   
+
+#endian conversion helper functions
+def convert_hex(str, enc1, enc2):
+    return int2bytes(int.from_bytes(bytes.fromhex(str), enc1), enc2).hex()
+def int2bytes(i, enc):
+    return i.to_bytes((i.bit_length() + 7) // 8, enc)
+
 #makes the chain   
 def make_chain():
+    be = "AA55CC3301AA55CC330F234567"
+    bb= convert_hex(be, 'big', 'little')
+    print(bb)
     chain=[]
     with open(file_path, 'rb') as openfileobject:
         #if you cannot get68 bytes
         try:
             for block in iter(partial(openfileobject.read, 68), b''):
                 blockContents = block_head_struct.unpack(block)
-                blockContents = block_head_struct.unpack(block)
                 hash = blockContents[0]
                 from binascii import hexlify
                 hash= hexlify(hash).decode('ascii')
                 new_block = Block(1,2,3,4,5,6,7)
                 new_block.previous_hash=hash  # 20 bytes
-                new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
-                new_block.case_id=UUID(bytes=blockContents[2])  # 16 bytes
+                new_block.time_stamp=str(datetime.fromtimestamp(blockContents[1]).isoformat())+"Z"
+                #new_block.time_stamp= datetime.fromtimestamp(blockContents[1])  # 08 bytes
+                #case id fliping from little to big endian
+                t2 = str(UUID(bytes=blockContents[2])).replace("-","")
+                t3 = convert_hex(t2, "little", "big")
+                t3 = t3[:8] + '-' + t3[8:12] + '-' + t3[12:16] + '-' + t3[16:20] + '-' + t3[20:]
+                new_block.case_id=t3
+                #check if empty if so just cast to UUID
+                test=UUID(bytes=blockContents[2])  # 16 bytes
+                if test.int == 0:
+                    new_block.case_id= test
                 new_block.evidence_item_id=blockContents[3]  # 04 bytes
                 new_block.state=blockContents[4].decode('utf-8')  # 11 bytes
                 new_block.data_length=blockContents[5]  # 04 bytes                

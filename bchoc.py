@@ -18,7 +18,7 @@ file_path = os.environ["BCHOC_FILE_PATH"]
 debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
 #file_path = 'blockchain'
-#debug = True
+#ddebug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
