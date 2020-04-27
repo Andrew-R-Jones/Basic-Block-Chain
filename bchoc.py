@@ -280,7 +280,7 @@ def log(reverse, num_entries, item_id, case_id):
             if str(block.case_id) == case_id:
                 print("Case: " + str(block.case_id))
                 print("Item: " + str(block.evidence_item_id))
-                print("Action: " + block.state)
+                print("Action: " + block.state.strip(' \t\r\n\0'))
                 print("Time: " + str(block.time_stamp))
                 print("")
                 count += 1
@@ -292,7 +292,7 @@ def log(reverse, num_entries, item_id, case_id):
             if str(block.evidence_item_id) == item_id:
                 print("Case: " + str(block.case_id))
                 print("Item: " + str(block.evidence_item_id))
-                print("Action: " + block.state)
+                print("Action: " + block.state.strip(' \t\r\n\0'))
                 print("Time: " + block.time_stamp)
                 print("")
                 count += 1
