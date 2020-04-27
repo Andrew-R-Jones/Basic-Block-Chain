@@ -14,11 +14,11 @@ from datetime import datetime, timedelta, timezone
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
-debug = False
+#file_path = os.environ["BCHOC_FILE_PATH"]
+#debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
-#debug = True
+file_path = 'blockchain'
+debug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
@@ -359,15 +359,15 @@ def remove():
                             pack_data = commands[0].strip('\"')
                         else:
                             print("Need to add -o REASON")
-                            return 1
+                            exit(1)
                     elif state == 'DISPOSED' or state == 'DESTROYED':
                         state = state
                     else:
                         print("Invalid entry")
-                        return 1
+                        exit(1)
                 else:
                     print("Invalid Syntax")
-                    return 1
+                    exit(1)
                 print("Case: " + str(b.case_id))
                 print("Removed item: " + str(b.evidence_item_id))
                 print("  Status: " + state)
@@ -384,10 +384,10 @@ def remove():
 
                 return None
         print("Item id not found")
-        return 1
+        exit(1)
     else:
         print("Invalid Syntax")
-        return 1
+        exit(1)
 
     return None
 

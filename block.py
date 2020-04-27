@@ -30,11 +30,11 @@ import os
 
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
-file_path = os.environ["BCHOC_FILE_PATH"]
-debug = False
+#file_path = os.environ["BCHOC_FILE_PATH"]
+#debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
-#file_path = 'blockchain'
-#debug = True
+file_path = 'blockchain'
+debug = True
 ########################################################################################
 
 def get_current_time():
