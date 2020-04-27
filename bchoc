@@ -15,10 +15,10 @@ from datetime import datetime, timedelta, timezone
 ########################################################################################
 ###############     FOR SUBMISSION      ################################################
 #file_path = os.environ["BCHOC_FILE_PATH"]
-#debug = False
+debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
 file_path = 'blockchain'
-debug = True
+#debug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
@@ -280,7 +280,7 @@ def log(reverse, num_entries, item_id, case_id):
             if str(block.case_id) == case_id:
                 print("Case: " + str(block.case_id))
                 print("Item: " + str(block.evidence_item_id))
-                print("Action: " + block.state)
+                print("Action: " + block.state.strip(' \t\r\n\0'))
                 print("Time: " + str(block.time_stamp))
                 print("")
                 count += 1
@@ -292,7 +292,7 @@ def log(reverse, num_entries, item_id, case_id):
             if str(block.evidence_item_id) == item_id:
                 print("Case: " + str(block.case_id))
                 print("Item: " + str(block.evidence_item_id))
-                print("Action: " + block.state)
+                print("Action: " + block.state.strip(' \t\r\n\0'))
                 print("Time: " + block.time_stamp)
                 print("")
                 count += 1
@@ -531,7 +531,7 @@ def run_commands(command):
             log(reverse, num_entries, item_id, case_id)
             exit(0)
         elif len(commands) == 1: #only -r can do this
-            log(reverse, num_entries, item_id, case_id)
+            log(True, num_entries, item_id, case_id)
             exit(0)
         #at this point we have 2 or more commands -n 15 or -r -n 15
         while(len(commands) != 0):

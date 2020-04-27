@@ -153,9 +153,6 @@ def int2bytes(i, enc):
 
 #makes the chain   
 def make_chain():
-    be = "AA55CC3301AA55CC330F234567"
-    bb= convert_hex(be, 'big', 'little')
-    print(bb)
     chain=[]
     with open(file_path, 'rb') as openfileobject:
         #if you cannot get68 bytes
@@ -201,5 +198,3 @@ def make_chain():
         except:
             print("corrupted block")
             exit(1)
-        
-            

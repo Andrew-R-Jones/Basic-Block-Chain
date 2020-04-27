@@ -18,11 +18,10 @@ file_path = os.environ["BCHOC_FILE_PATH"]
 debug = False
 ###############     FOR DUBUG AND TESTING       ########################################
 #file_path = 'blockchain'
-#ddebug = True
+#debug = True
 ########################################################################################
 if (path.exists(file_path) == False): #check if there is a file yet
     open(file_path, 'w').close() #create the file
-
 
 chain = [] # global list that will hold all blocks and will create the chain
 
@@ -531,7 +530,7 @@ def run_commands(command):
             log(reverse, num_entries, item_id, case_id)
             exit(0)
         elif len(commands) == 1: #only -r can do this
-            log(reverse, num_entries, item_id, case_id)
+            log(True, num_entries, item_id, case_id)
             exit(0)
         #at this point we have 2 or more commands -n 15 or -r -n 15
         while(len(commands) != 0):
